@@ -1201,6 +1201,9 @@ select.input {
     <button class="nav-item" onclick="switchPanel('inspo', this)" data-panel="inspo" data-group="life">
       <span class="nav-icon">💡</span> 灵感管理
     </button>
+    <button class="nav-item" onclick="switchPanel('english', this)" data-panel="english" data-group="life">
+      <span class="nav-icon">🇬🇧</span> 英语口语
+    </button>
 
     <!-- 健身区 -->
     <div class="nav-group-label" style="margin-top:6px;">💪 健身区</div>
@@ -1470,6 +1473,84 @@ select.input {
       </div>
     </section>
 
+    <!-- ===== ENGLISH PANEL ===== -->
+    <section class="panel" id="panel-english">
+      <div class="panel-title">🇬🇧 英语口语</div>
+      <div class="panel-subtitle">100天打卡计划 · 流利说英语</div>
+
+      <!-- Progress -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">📊</span> 打卡进度</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div style="width:72px;height:72px;border-radius:50%;background:conic-gradient(#f43f5e var(--eng-pct,0%),#fce4ec 0);display:flex;align-items:center;justify-content:center;position:relative;">
+            <div style="width:56px;height:56px;border-radius:50%;background:white;display:flex;align-items:center;justify-content:center;">
+              <span style="font-size:18px;font-weight:800;color:var(--pink-500);" id="engProgress">0</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size:13px;font-weight:600;">Day <span id="engDayNum">1</span> / 100</div>
+            <div class="progress-bar" style="width:120px;"><div class="progress-fill progress-pink" id="engProgressBar" style="width:0%"></div></div>
+            <div style="font-size:11px;color:var(--text-muted);">连续打卡 <span id="engStreak">0</span> 天 🔥</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Today's Sentence -->
+      <div class="card" style="background:linear-gradient(135deg,#eff6ff,#dbeafe);border:1px solid #bfdbfe;">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">📖</span> 今日一句</div>
+        </div>
+        <div style="font-size:20px;font-weight:700;color:#1e40af;margin-bottom:6px;" id="engSentenceEN"></div>
+        <div style="font-size:15px;color:#3b82a6;margin-bottom:12px;" id="engSentenceCN"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-primary btn-sm" onclick="speakEnglish()">🔊 听原声</button>
+          <button class="btn btn-yellow btn-sm" onclick="startEnglishRepeat()" id="engRepeatBtn">🎤 跟读</button>
+          <span id="engRepeatStatus" style="font-size:12px;align-self:center;color:var(--text-muted);">跟读 0/3 遍</span>
+        </div>
+      </div>
+
+      <!-- Task Card -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">✅</span> 今日任务</div>
+          <button class="btn btn-primary btn-sm" onclick="completeEnglishDay()" id="engCheckinBtn">🏆 完成打卡</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fffafb;border-radius:10px;">
+            <input type="checkbox" id="engTaskRepeat" onchange="updateEngTask()" style="width:18px;height:18px;accent-color:var(--pink-500);">
+            <span style="font-size:13px;">跟读 3 遍（<span id="engRepeatCount">0</span>/3）</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fffafb;border-radius:10px;">
+            <input type="checkbox" id="engTaskWords" style="width:18px;height:18px;accent-color:var(--pink-500);">
+            <span style="font-size:13px;">记录生词</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- New Words -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">📝</span> 生词本</div>
+          <button class="btn btn-secondary btn-sm" onclick="addEngWord()">+ 添加</button>
+        </div>
+        <div id="engWordList"></div>
+        <div class="empty-state" id="engWordEmpty">
+          <div class="icon">📒</div>
+          <div class="text">还没有记录生词</div>
+        </div>
+      </div>
+
+      <!-- History -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title"><span class="icon">🗓️</span> 打卡日历</div>
+        </div>
+        <div class="calendar-grid" id="engCalendar"></div>
+      </div>
+    </section>
+
     <!-- ===== PLANS PANEL ===== -->
     <section class="panel" id="panel-plans">
       <div class="panel-title">✨ 个人计划</div>
@@ -1549,6 +1630,9 @@ function getDefaultData() {
     balletLogs: [],
     fitnessLogs: [],
     doneItems: [],
+    englishCheckins: {},
+    englishRepeatCount: {},
+    englishWords: [],
     checkins: {},
     lastResetDate: new Date().toDateString()
   };
@@ -1570,7 +1654,47 @@ function checkDailyReset() {
   }
 }
 
-function persist() { saveData(appData); }
+function persist() { saveData(appData); syncToServer(); }
+
+// ==================== CLOUD SYNC ====================
+let syncTimer = null;
+let lastSyncHash = '';
+
+function syncToServer() {
+  // Debounce: sync at most once every 3 seconds
+  if (syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    const json = JSON.stringify(appData);
+    const hash = json.length.toString(); // simple hash for change detection
+    if (hash === lastSyncHash) return;
+    lastSyncHash = hash;
+    fetch('/api/data/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: json
+    }).catch(() => {}); // silently ignore if server unavailable
+  }, 3000);
+}
+
+async function loadFromServer() {
+  try {
+    const resp = await fetch('/api/data/load');
+    if (!resp.ok) return;
+    const serverData = await resp.json();
+    // Merge: server data wins if it has actual content
+    if (serverData && Object.keys(serverData).length > 0 && serverData.workTasks) {
+      // Only merge if server has meaningful data
+      const localCount = (appData.workTasks||[]).length + (appData.expenses||[]).length + (appData.books||[]).length;
+      const serverCount = (serverData.workTasks||[]).length + (serverData.expenses||[]).length + (serverData.books||[]).length;
+      if (serverCount > localCount) {
+        appData = { ...getDefaultData(), ...serverData };
+        saveData(appData);
+        return true; // signal that data was reloaded
+      }
+    }
+  } catch(e) {} // server not available
+  return false;
+}
 
 // ==================== HELPERS ====================
 function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 8); }
@@ -1776,7 +1900,7 @@ function switchPanel(panelName, el) {
 
   // Update bottom nav
   document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
-  const mobileMap = { work: 0, expense: 1, books: 1, inspo: 2, ballet: 3, fitness: 3, plans: 4 };
+  const mobileMap = { work: 0, expense: 1, books: 1, inspo: 1, english: 1, ballet: 3, fitness: 3, plans: 4 };
   const bottomItems = document.querySelectorAll('.bottom-nav-item');
   const idx = mobileMap[panelName];
   if (idx !== undefined && bottomItems[idx]) bottomItems[idx].classList.add('active');
@@ -1806,6 +1930,7 @@ function refreshCurrentPanel(panelName) {
     case 'expense': renderExpenses(); break;
     case 'books': renderBooks(); break;
     case 'inspo': renderInspirations(); break;
+    case 'english': renderEnglish(); break;
     case 'ballet': renderBallet(); break;
     case 'fitness': renderFitness(); break;
     case 'plans': renderDoneItems(); break;
@@ -2773,9 +2898,285 @@ function renderDoneItems() {
   }
 }
 
+// ==================== ENGLISH SPEAKING ====================
+const ENGLISH_SENTENCES = [
+  {en:"The only way to do great work is to love what you do.",cn:"成就伟大的唯一途径是热爱你所做的事。"},
+  {en:"Life is what happens when you're busy making other plans.",cn:"生活就是在你忙于制定其他计划时发生的事情。"},
+  {en:"In the middle of difficulty lies opportunity.",cn:"困难之中蕴藏着机遇。"},
+  {en:"The future belongs to those who believe in the beauty of their dreams.",cn:"未来属于那些相信梦想之美的人。"},
+  {en:"It does not matter how slowly you go as long as you do not stop.",cn:"走得慢没关系，只要你不停止。"},
+  {en:"Success is not final, failure is not fatal: it is the courage to continue that counts.",cn:"成功不是终点，失败也非末日，最重要的是继续前进的勇气。"},
+  {en:"Be the change that you wish to see in the world.",cn:"欲变世界，先变其身。"},
+  {en:"The best time to plant a tree was 20 years ago. The second best time is now.",cn:"种树最好的时间是二十年前，其次是现在。"},
+  {en:"Everything you've ever wanted is on the other side of fear.",cn:"你想要的一切都在恐惧的彼岸。"},
+  {en:"Don't count the days, make the days count.",cn:"不要数日子，让每一天都有意义。"},
+  {en:"The only limit to our realization of tomorrow is our doubts of today.",cn:"实现明天理想的唯一障碍是今天的疑虑。"},
+  {en:"What you do today can improve all your tomorrows.",cn:"今日的付出，成就更好的明天。"},
+  {en:"Happiness is not something ready made. It comes from your own actions.",cn:"幸福不是现成的，它来自你的行动。"},
+  {en:"The secret of getting ahead is getting started.",cn:"前进的秘诀就是开始行动。"},
+  {en:"Small steps every day lead to big results.",cn:"每天一小步，成就大未来。"},
+  {en:"Your attitude determines your direction.",cn:"你的态度决定你的方向。"},
+  {en:"Dream big and dare to fail.",cn:"敢于梦想，敢于失败。"},
+  {en:"Every expert was once a beginner.",cn:"每个专家都曾是初学者。"},
+  {en:"Practice makes progress, not perfect.",cn:"练习带来进步，而非完美。"},
+  {en:"The harder you work, the luckier you get.",cn:"越努力，越幸运。"},
+  {en:"Don't let yesterday take up too much of today.",cn:"别让昨天占据太多的今天。"},
+  {en:"Strive not to be a success, but rather to be of value.",cn:"不要努力成为一个成功者，要努力成为一个有价值的人。"},
+  {en:"The only person you should try to be better than is who you were yesterday.",cn:"你唯一要超越的人是昨天的自己。"},
+  {en:"It always seems impossible until it's done.",cn:"完成之前总看似不可能。"},
+  {en:"Action is the foundational key to all success.",cn:"行动是一切成功的基石。"},
+  {en:"Do what you can, with what you have, where you are.",cn:"在你所处之地，用你所有，尽你所能。"},
+  {en:"Quality is not an act, it is a habit.",cn:"卓越不是一个行为，而是一种习惯。"},
+  {en:"The mind is everything. What you think you become.",cn:"心是一切，你想什么就会成为什么。"},
+  {en:"If you want to fly, give up everything that weighs you down.",cn:"如果你想飞，就放弃所有让你沉重的东西。"},
+  {en:"Turn your wounds into wisdom.",cn:"把伤痛化为智慧。"},
+  {en:"A journey of a thousand miles begins with a single step.",cn:"千里之行，始于足下。"},
+  {en:"Where there is a will, there is a way.",cn:"有志者，事竟成。"},
+  {en:"Knowledge speaks, but wisdom listens.",cn:"知识在说，智慧在听。"},
+  {en:"Time you enjoy wasting is not wasted time.",cn:"享受浪费的时间，就不是真正的浪费。"},
+  {en:"Do one thing every day that scares you.",cn:"每天做一件让你害怕的事。"},
+  {en:"The best revenge is massive success.",cn:"最好的报复是巨大的成功。"},
+  {en:"Stay hungry, stay foolish.",cn:"求知若饥，虚心若愚。"},
+  {en:"Think different.",cn:"不同凡想。"},
+  {en:"Less is more.",cn:"少即是多。"},
+  {en:"Keep it simple, stupid.",cn:"保持简单。"},
+  {en:"Make it happen.",cn:"让它发生。"},
+  {en:"No pain, no gain.",cn:"不劳无获。"},
+  {en:"Better late than never.",cn:"迟做总比不做好。"},
+  {en:"Actions speak louder than words.",cn:"行动胜于空谈。"},
+  {en:"Every cloud has a silver lining.",cn:"黑暗中总有一线光明。"},
+  {en:"When in Rome, do as the Romans do.",cn:"入乡随俗。"},
+  {en:"Rome wasn't built in a day.",cn:"罗马不是一天建成的。"},
+  {en:"Practice what you preach.",cn:"言行一致。"},
+  {en:"Two heads are better than one.",cn:"三个臭皮匠，顶个诸葛亮。"},
+  {en:"Honesty is the best policy.",cn:"诚实为上策。"},
+  {en:"A friend in need is a friend indeed.",cn:"患难见真情。"},
+  {en:"Fortune favors the bold.",cn:"运气眷顾勇者。"},
+  {en:"The early bird catches the worm.",cn:"早起的鸟儿有虫吃。"},
+  {en:"Don't put all your eggs in one basket.",cn:"不要把鸡蛋放在一个篮子里。"},
+  {en:"You reap what you sow.",cn:"种瓜得瓜，种豆得豆。"},
+  {en:"The pen is mightier than the sword.",cn:"笔锋胜过刀剑。"},
+  {en:"Love conquers all.",cn:"爱能战胜一切。"},
+  {en:"Time is money.",cn:"时间就是金钱。"},
+  {en:"First things first.",cn:"要事第一。"},
+  {en:"Never say never.",cn:"永不说不。"},
+  {en:"Nothing ventured, nothing gained.",cn:"不入虎穴，焉得虎子。"},
+  {en:"Easy come, easy go.",cn:"来得容易去得快。"},
+  {en:"Out of sight, out of mind.",cn:"眼不见，心不烦。"},
+  {en:"Great minds think alike.",cn:"英雄所见略同。"},
+  {en:"Look before you leap.",cn:"三思而后行。"},
+  {en:"Live and let live.",cn:"自己活，也让别人活。"},
+  {en:"Kill two birds with one stone.",cn:"一石二鸟。"},
+  {en:"Bite the bullet.",cn:"咬紧牙关。"},
+  {en:"Break the ice.",cn:"打破沉默。"},
+  {en:"Call it a day.",cn:"收工吧。"},
+  {en:"Hang in there.",cn:"坚持住。"},
+  {en:"It's not rocket science.",cn:"这不难。"},
+  {en:"Let the cat out of the bag.",cn:"泄露秘密。"},
+  {en:"Once in a blue moon.",cn:"千载难逢。"},
+  {en:"Piece of cake.",cn:"小菜一碟。"},
+  {en:"So far, so good.",cn:"到目前为止还不错。"},
+  {en:"The ball is in your court.",cn:"轮到你了。"},
+  {en:"Under the weather.",cn:"身体不适。"},
+  {en:"You can say that again.",cn:"你说得对极了。"},
+  {en:"A blessing in disguise.",cn:"因祸得福。"},
+  {en:"Beat around the bush.",cn:"拐弯抹角。"},
+  {en:"Cutting corners.",cn:"走捷径。"},
+  {en:"Get out of hand.",cn:"失控。"},
+  {en:"Hit the sack.",cn:"睡觉。"},
+  {en:"It takes two to tango.",cn:"一个巴掌拍不响。"},
+  {en:"Let sleeping dogs lie.",cn:"别惹麻烦。"},
+  {en:"Miss the boat.",cn:"错过机会。"},
+  {en:"On the ball.",cn:"机灵能干。"},
+  {en:"Pull yourself together.",cn:"振作起来。"},
+  {en:"See eye to eye.",cn:"意见一致。"},
+  {en:"Take it with a grain of salt.",cn:"半信半疑。"},
+  {en:"Up in the air.",cn:"悬而未决。"},
+  {en:"Burning the midnight oil.",cn:"挑灯夜战。"},
+  {en:"Cross that bridge when you come to it.",cn:"船到桥头自然直。"},
+  {en:"Don't judge a book by its cover.",cn:"不要以貌取人。"},
+  {en:"Every dog has its day.",cn:"人人都有得意时。"},
+  {en:"Give the benefit of the doubt.",cn:"往好处想。"},
+  {en:"Hit the nail on the head.",cn:"一针见血。"},
+  {en:"It goes without saying.",cn:"不言而喻。"},
+  {en:"Keep your chin up.",cn:"别气馁。"},
+  {en:"Make a long story short.",cn:"长话短说。"},
+  {en:"No regrets.",cn:"不后悔。"},
+];
+
+let engRepeatCount = 0;
+
+function getEngDayIndex(today) {
+  let hash = 0;
+  for (let i = 0; i < today.length; i++) hash = (hash * 31 + today.charCodeAt(i)) % ENGLISH_SENTENCES.length;
+  return hash;
+}
+
+function renderEnglish() {
+  const today = getToday();
+  const dayIdx = getEngDayIndex(today);
+  const sent = ENGLISH_SENTENCES[dayIdx];
+  
+  document.getElementById('engSentenceEN').textContent = sent.en;
+  document.getElementById('engSentenceCN').textContent = sent.cn;
+  
+  // Progress
+  const completed = (appData.englishCheckins || {});
+  const completedDays = Object.keys(completed).filter(k => completed[k]).length;
+  const pct = Math.min(100, Math.round(completedDays / 100 * 100));
+  
+  document.getElementById('engProgress').textContent = completedDays;
+  document.getElementById('engDayNum').textContent = Math.min(100, completedDays + 1);
+  document.getElementById('engProgressBar').style.width = pct + '%';
+  document.documentElement.style.setProperty('--eng-pct', (pct / 100 * 360) + 'deg');
+  
+  // Streak
+  let streak = 0, d = new Date();
+  while ((completed)[formatDate(d)]) { streak++; d.setDate(d.getDate()-1); }
+  document.getElementById('engStreak').textContent = streak;
+  
+  // Check if today done
+  const todayDone = completed[today];
+  engRepeatCount = (appData.englishRepeatCount || {})[today] || 0;
+  document.getElementById('engRepeatCount').textContent = engRepeatCount;
+  document.getElementById('engRepeatStatus').textContent = `跟读 ${engRepeatCount}/3 遍`;
+  document.getElementById('engTaskRepeat').checked = engRepeatCount >= 3;
+  
+  if (todayDone) {
+    document.getElementById('engCheckinBtn').textContent = '✅ 今日已完成';
+    document.getElementById('engCheckinBtn').className = 'btn btn-secondary btn-sm';
+    document.getElementById('engCheckinBtn').disabled = true;
+  } else {
+    document.getElementById('engCheckinBtn').textContent = '🏆 完成打卡';
+    document.getElementById('engCheckinBtn').className = 'btn btn-primary btn-sm';
+    document.getElementById('engCheckinBtn').disabled = false;
+  }
+  
+  // Words
+  renderEngWords();
+  renderEngCalendar();
+}
+
+function speakEnglish() {
+  if (!window.speechSynthesis) { showToast('浏览器不支持语音'); return; }
+  const sent = ENGLISH_SENTENCES[getEngDayIndex(getToday())];
+  const u = new SpeechSynthesisUtterance(sent.en);
+  u.lang = 'en-US'; u.rate = 0.8; u.pitch = 1.0;
+  const voices = window.speechSynthesis.getVoices();
+  const enVoice = voices.find(v => v.lang.startsWith('en-US'));
+  if (enVoice) u.voice = enVoice;
+  window.speechSynthesis.speak(u);
+}
+
+function startEnglishRepeat() {
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognition) { showToast('需要Chrome浏览器'); return; }
+  
+  const rec = new SpeechRecognition();
+  rec.lang = 'en-US'; rec.continuous = false; rec.interimResults = false;
+  
+  const btn = document.getElementById('engRepeatBtn');
+  btn.textContent = '🎤 聆听中...';
+  btn.disabled = true;
+  
+  rec.onresult = (e) => {
+    const transcript = e.results[0][0].transcript;
+    const sent = ENGLISH_SENTENCES[getEngDayIndex(getToday())];
+    // Increment count
+    engRepeatCount++;
+    if (!appData.englishRepeatCount) appData.englishRepeatCount = {};
+    appData.englishRepeatCount[getToday()] = engRepeatCount;
+    persist();
+    document.getElementById('engRepeatCount').textContent = engRepeatCount;
+    document.getElementById('engRepeatStatus').textContent = `跟读 ${engRepeatCount}/3 遍`;
+    document.getElementById('engTaskRepeat').checked = engRepeatCount >= 3;
+    showToast(`✅ 第 ${engRepeatCount} 遍完成！`);
+  };
+  
+  rec.onerror = () => { showToast('未识别到语音，请重试'); };
+  rec.onend = () => {
+    btn.textContent = '🎤 跟读';
+    btn.disabled = false;
+  };
+  rec.start();
+}
+
+function completeEnglishDay() {
+  const today = getToday();
+  if (engRepeatCount < 3) { showToast('请先完成跟读 3 遍'); return; }
+  if (!appData.englishCheckins) appData.englishCheckins = {};
+  appData.englishCheckins[today] = true;
+  persist();
+  renderEnglish();
+  showToast('🏆 今日打卡完成！Excellent!');
+}
+
+function updateEngTask() {
+  document.getElementById('engTaskRepeat').checked = engRepeatCount >= 3;
+}
+
+function addEngWord() {
+  const word = prompt('输入生词：');
+  if (!word || !word.trim()) return;
+  const meaning = prompt('输入释义：');
+  if (!appData.englishWords) appData.englishWords = [];
+  appData.englishWords.unshift({ word: word.trim(), meaning: (meaning||'').trim(), date: getToday(), id: genId() });
+  persist();
+  renderEngWords();
+}
+
+function deleteEngWord(id) {
+  if (!appData.englishWords) return;
+  appData.englishWords = appData.englishWords.filter(w => w.id !== id);
+  persist();
+  renderEngWords();
+}
+
+function renderEngWords() {
+  const words = (appData.englishWords || []).filter(w => w.date === getToday());
+  const list = document.getElementById('engWordList');
+  const empty = document.getElementById('engWordEmpty');
+  if (words.length === 0) { list.innerHTML = ''; empty.style.display = 'block'; }
+  else {
+    empty.style.display = 'none';
+    list.innerHTML = words.map(w => 
+      `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;background:#fffafb;border-radius:8px;margin-bottom:6px;">
+        <div><b style="color:#1e40af;">${escHtml(w.word)}</b> <span style="color:var(--text-muted);">— ${escHtml(w.meaning||'')}</span></div>
+        <button class="btn btn-danger btn-xs" onclick="deleteEngWord('${w.id}')">✕</button>
+      </div>`
+    ).join('');
+  }
+}
+
+function renderEngCalendar() {
+  const now = new Date();
+  const year = now.getFullYear(), month = now.getMonth();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const today = now.getDate();
+  const checkins = appData.englishCheckins || {};
+  
+  let html = '';
+  ['日','一','二','三','四','五','六'].forEach(d => html += `<div class="calendar-day-header">${d}</div>`);
+  for (let i = 0; i < firstDay; i++) html += '<div class="calendar-day empty"></div>';
+  for (let d = 1; d <= daysInMonth; d++) {
+    const ds = `${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    let cls = 'calendar-day';
+    if (checkins[ds]) cls += ' checked';
+    if (d === today) cls += ' today';
+    html += `<div class="${cls}">${d}</div>`;
+  }
+  document.getElementById('engCalendar').innerHTML = html;
+}
+
 // ==================== INIT ====================
-function init() {
+async function init() {
   checkDailyReset();
+  // Try to load from cloud server first
+  const reloaded = await loadFromServer();
+  if (reloaded) {
+    // Re-render all if server had newer data
+  }
   updateClock();
   updateQuote();
   updateCheckinUI();
@@ -2786,6 +3187,7 @@ function init() {
   renderBallet();
   renderFitness();
   renderDoneItems();
+  renderEnglish();
 
   setInterval(updateClock, 1000);
 

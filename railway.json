@@ -1,0 +1,11 @@
+{
+  "build": {
+    "dockerfilePath": "Dockerfile"
+  },
+  "deploy": {
+    "startCommand": "",
+    "healthcheckPath": "/api/data/load",
+    "restartPolicyType": "ON_FAILURE",
+    "numReplicas": 1
+  }
+}

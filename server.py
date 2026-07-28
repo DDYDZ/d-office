@@ -27,7 +27,8 @@ CITY_COORDS = {
 
 class Handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
-        super().__init__(*args, directory='/workspace/d-office', **kwargs)
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        super().__init__(*args, directory=base_dir, **kwargs)
 
     def do_POST(self):
         if self.path == '/api/chart':
@@ -67,8 +68,33 @@ class Handler(http.server.SimpleHTTPRequestHandler):
                 self.send_json(200, {"success":True, "summary":"\n".join(lines)})
             except Exception as e:
                 self.send_json(500, {"success":False, "error":str(e)})
+        elif self.path == '/api/data/save':
+            cl = int(self.headers.get('Content-Length', 0))
+            body = json.loads(self.rfile.read(cl))
+            try:
+                data_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data.json')
+                with open(data_file, 'w') as f:
+                    json.dump(body, f, ensure_ascii=False)
+                self.send_json(200, {"ok":True})
+            except Exception as e:
+                self.send_json(500, {"ok":False, "error":str(e)})
         else:
             self.send_json(404, {"error":"not found"})
+
+    def do_GET(self):
+        if self.path == '/api/data/load':
+            try:
+                data_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'data.json')
+                if os.path.exists(data_file):
+                    with open(data_file, 'r') as f:
+                        data = json.load(f)
+                    self.send_json(200, data)
+                else:
+                    self.send_json(200, {})
+            except Exception as e:
+                self.send_json(500, {"error":str(e)})
+        else:
+            super().do_GET()
 
     def send_json(self, code, data):
         self.send_response(code)

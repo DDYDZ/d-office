@@ -1,0 +1,10 @@
+skills/vedic-astrology/venv
+skills/vedic-astrology/__pycache__
+skills/vedic-astrology/scripts/__pycache__
+.git
+nohup.out
+*.log
+data.json
+__pycache__
+*.pyc
+api/

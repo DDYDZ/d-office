@@ -1,0 +1,6 @@
+#!/workspace/skills/vedic-astrology/venv/bin/python
+import sys
+from geocoder.cli import cli
+if __name__ == '__main__':
+    sys.argv[0] = sys.argv[0].removesuffix('.exe')
+    sys.exit(cli())
