@@ -1656,43 +1656,43 @@ function checkDailyReset() {
 
 function persist() { saveData(appData); syncToServer(); }
 
-// ==================== CLOUD SYNC ====================
+// ==================== CLOUD SYNC (JSONBlob — 免费无需认证) ====================
+const SYNC_URL = 'https://jsonblob.com/api/jsonBlob/019fa872-9344-798a-9ab1-ac9a6b6c44d6';
 let syncTimer = null;
 let lastSyncHash = '';
 
-function syncToServer() {
-  // Debounce: sync at most once every 3 seconds
+async function syncToServer() {
   if (syncTimer) clearTimeout(syncTimer);
-  syncTimer = setTimeout(() => {
+  syncTimer = setTimeout(async () => {
     const json = JSON.stringify(appData);
-    const hash = json.length.toString(); // simple hash for change detection
+    const hash = json.length.toString();
     if (hash === lastSyncHash) return;
     lastSyncHash = hash;
-    fetch('/api/data/save', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: json
-    }).catch(() => {}); // silently ignore if server unavailable
+    try {
+      await fetch(SYNC_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: json
+      });
+    } catch(e) {}
   }, 3000);
 }
 
 async function loadFromServer() {
   try {
-    const resp = await fetch('/api/data/load');
-    if (!resp.ok) return;
+    const resp = await fetch(SYNC_URL + '?t=' + Date.now());
+    if (!resp.ok) return false;
     const serverData = await resp.json();
-    // Merge: server data wins if it has actual content
-    if (serverData && Object.keys(serverData).length > 0 && serverData.workTasks) {
-      // Only merge if server has meaningful data
-      const localCount = (appData.workTasks||[]).length + (appData.expenses||[]).length + (appData.books||[]).length;
-      const serverCount = (serverData.workTasks||[]).length + (serverData.expenses||[]).length + (serverData.books||[]).length;
+    if (serverData && typeof serverData === 'object' && Object.keys(serverData).length > 0 && serverData.workTasks !== undefined) {
+      const localCount = (appData.workTasks||[]).length + (appData.expenses||[]).length + (appData.books||[]).length + (appData.doneItems||[]).length;
+      const serverCount = (serverData.workTasks||[]).length + (serverData.expenses||[]).length + (serverData.books||[]).length + (serverData.doneItems||[]).length;
       if (serverCount > localCount) {
         appData = { ...getDefaultData(), ...serverData };
         saveData(appData);
-        return true; // signal that data was reloaded
+        return true;
       }
     }
-  } catch(e) {} // server not available
+  } catch(e) {}
   return false;
 }
 
