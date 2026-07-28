@@ -1201,9 +1201,6 @@ select.input {
     <button class="nav-item" onclick="switchPanel('inspo', this)" data-panel="inspo" data-group="life">
       <span class="nav-icon">💡</span> 灵感管理
     </button>
-    <button class="nav-item" onclick="switchPanel('astrology', this)" data-panel="astrology" data-group="life">
-      <span class="nav-icon">🔮</span> 占星
-    </button>
 
     <!-- 健身区 -->
     <div class="nav-group-label" style="margin-top:6px;">💪 健身区</div>
@@ -1473,76 +1470,6 @@ select.input {
       </div>
     </section>
 
-    <!-- ===== ASTROLOGY PANEL ===== -->
-    <section class="panel" id="panel-astrology">
-      <div class="panel-title">🔮 占星</div>
-      <div class="panel-subtitle">吠陀占星 · 本命盘 · 排盘分析</div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title"><span class="icon">🌟</span> 出生信息（排盘用）</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          <input class="input" id="asName" placeholder="姓名（可选）" value="">
-          <input class="input" id="asBirthDate" type="date" placeholder="出生日期">
-          <input class="input" id="asBirthTime" type="time" placeholder="出生时间" step="60">
-          <input class="input" id="asBirthPlace" placeholder="出生地点（如：北京、上海）">
-          <div style="display:flex;gap:10px;">
-            <button class="btn btn-primary" onclick="saveAstrologyProfile()" style="flex:1">💾 保存出生信息</button>
-          </div>
-          <div id="asProfileSaved" style="font-size:12px;color:var(--text-muted);text-align:center;display:none;">
-            ✅ 出生信息已保存，排盘时自动使用
-          </div>
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title"><span class="icon">🔮</span> 占星分析</div>
-        </div>
-        <p style="font-size:13px;color:var(--text-secondary);line-height:1.6;margin-bottom:12px;">
-          D事务所已接入<strong>吠陀占星(Vedic Astrology)</strong>系统，支持：
-        </p>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;">
-          <div style="background:#fff5f7;padding:10px;border-radius:10px;font-size:12px;">🌟 本命盘排盘</div>
-          <div style="background:#fff5f7;padding:10px;border-radius:10px;font-size:12px;">🏠 十二宫分析</div>
-          <div style="background:#fff5f7;padding:10px;border-radius:10px;font-size:12px;">💼 职业分析</div>
-          <div style="background:#fff5f7;padding:10px;border-radius:10px;font-size:12px;">💕 恋爱婚姻</div>
-          <div style="background:#fff5f7;padding:10px;border-radius:10px;font-size:12px;">🤝 双人合盘</div>
-          <div style="background:#fff5f7;padding:10px;border-radius:10px;font-size:12px;">❓ Prashna 卜卦</div>
-          <div style="background:#fff5f7;padding:10px;border-radius:10px;font-size:12px;">⏰ 出生时间校准</div>
-          <div style="background:#fff5f7;padding:10px;border-radius:10px;font-size:12px;">📊 大运流年</div>
-        </div>
-
-        <div style="display:flex;flex-direction:column;gap:8px;">
-          <textarea class="input" id="asQuestion" placeholder="输入你的问题，例如：
-· 帮我排本命盘
-· 分析我的职业方向
-· 看看感情运势
-· 我和xxx的合盘如何" style="min-height:80px;"></textarea>
-          <button class="btn btn-yellow" onclick="askAstrology()" style="width:100%;justify-content:center;">
-            🔮 提交分析请求
-          </button>
-        </div>
-        <div id="asResult" style="margin-top:14px;font-size:13px;line-height:1.6;display:none;background:#fffbeb;padding:14px;border-radius:12px;border:1px solid #fde68a;">
-        </div>
-        <div style="margin-top:12px;padding:10px;background:#f0f9ff;border-radius:10px;font-size:12px;color:#0369a1;line-height:1.5;">
-          💡 <strong>提示：</strong>占星分析通过 WorkBuddy 后台的吠陀占星引擎计算。填好出生信息后，把你的问题发给我（WorkBuddy 聊天界面），我来为你排盘解读。
-        </div>
-      </div>
-
-      <div class="card">
-        <div class="card-header">
-          <div class="card-title"><span class="icon">📝</span> 占星记录</div>
-        </div>
-        <div id="astrologyLogs"></div>
-        <div class="empty-state" id="astrologyEmpty">
-          <div class="icon">🌟</div>
-          <div class="text">还没有占星记录</div>
-        </div>
-      </div>
-    </section>
-
     <!-- ===== PLANS PANEL ===== -->
     <section class="panel" id="panel-plans">
       <div class="panel-title">✨ 个人计划</div>
@@ -1579,8 +1506,8 @@ select.input {
   <button class="bottom-nav-item" onclick="switchPanelMobile('expense', this)">
     <span class="bnav-icon">🏠</span> 生活
   </button>
-  <button class="bottom-nav-item" onclick="switchPanelMobile('astrology', this)">
-    <span class="bnav-icon">🔮</span> 占星
+  <button class="bottom-nav-item" onclick="switchPanelMobile('inspo', this)">
+    <span class="bnav-icon">💡</span> 灵感
   </button>
   <button class="bottom-nav-item" onclick="switchPanelMobile('fitness', this)">
     <span class="bnav-icon">💪</span> 健身
@@ -1622,8 +1549,6 @@ function getDefaultData() {
     balletLogs: [],
     fitnessLogs: [],
     doneItems: [],
-    astrologyLogs: [],
-    astrologyProfile: null,
     checkins: {},
     lastResetDate: new Date().toDateString()
   };
@@ -1851,7 +1776,7 @@ function switchPanel(panelName, el) {
 
   // Update bottom nav
   document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
-  const mobileMap = { work: 0, expense: 1, books: 1, inspo: 1, astrology: 2, ballet: 3, fitness: 3, plans: 4 };
+  const mobileMap = { work: 0, expense: 1, books: 1, inspo: 2, ballet: 3, fitness: 3, plans: 4 };
   const bottomItems = document.querySelectorAll('.bottom-nav-item');
   const idx = mobileMap[panelName];
   if (idx !== undefined && bottomItems[idx]) bottomItems[idx].classList.add('active');
@@ -1881,7 +1806,6 @@ function refreshCurrentPanel(panelName) {
     case 'expense': renderExpenses(); break;
     case 'books': renderBooks(); break;
     case 'inspo': renderInspirations(); break;
-    case 'astrology': renderAstrologyLogs(); break;
     case 'ballet': renderBallet(); break;
     case 'fitness': renderFitness(); break;
     case 'plans': renderDoneItems(); break;
@@ -2849,131 +2773,6 @@ function renderDoneItems() {
   }
 }
 
-// ==================== ASTROLOGY ====================
-function saveAstrologyProfile() {
-  const name = document.getElementById('asName').value.trim();
-  const birthDate = document.getElementById('asBirthDate').value;
-  const birthTime = document.getElementById('asBirthTime').value;
-  const birthPlace = document.getElementById('asBirthPlace').value.trim();
-
-  if (!birthDate || !birthTime || !birthPlace) {
-    showToast('请填写出生日期、时间和地点');
-    return;
-  }
-
-  appData.astrologyProfile = { name, birthDate, birthTime, birthPlace };
-  persist();
-  document.getElementById('asProfileSaved').style.display = 'block';
-  setTimeout(() => {
-    document.getElementById('asProfileSaved').style.display = 'none';
-  }, 3000);
-  showToast('出生信息已保存 🌟');
-}
-
-async function askAstrology() {
-  const question = document.getElementById('asQuestion').value.trim();
-  if (!question) { showToast('请输入你的问题'); return; }
-
-  const profile = appData.astrologyProfile;
-  if (!profile || !profile.birthDate || !profile.birthTime || !profile.birthPlace) {
-    showToast('请先填写并保存出生信息');
-    return;
-  }
-
-  // Show loading
-  const resultEl = document.getElementById('asResult');
-  resultEl.style.display = 'block';
-  resultEl.innerHTML = '<div style="text-align:center;padding:20px;">🔮 正在使用吠陀占星引擎排盘计算中...</div>';
-
-  // Save to log
-  appData.astrologyLogs.unshift({
-    id: genId(),
-    question,
-    profile: profile ? {...profile} : null,
-    date: getToday(),
-    createdAt: new Date().toISOString()
-  });
-  persist();
-
-  try {
-    const resp = await fetch('/api/chart', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: profile.name || '',
-        birth_date: profile.birthDate,
-        birth_time: profile.birthTime,
-        birth_place: profile.birthPlace
-      })
-    });
-    const data = await resp.json();
-
-    if (data.success) {
-      resultEl.innerHTML = `
-        <div style="font-weight:700;margin-bottom:8px;color:#b45309;">🔮 星盘已生成 — 你的问题：${escHtml(question)}</div>
-        <pre style="white-space:pre-wrap;font-size:12px;line-height:1.6;font-family:'SF Mono',Menlo,monospace;background:#fffbeb;padding:12px;border-radius:10px;margin:8px 0;">${escHtml(data.summary)}</pre>
-        <div style="font-size:11px;color:var(--text-muted);margin-top:8px;">
-          ✨ 以上为吠陀占星引擎实时计算结果。如需深度解读（职业/感情/大运分析），请回到 WorkBuddy 对话发送。
-        </div>
-      `;
-    } else {
-      resultEl.innerHTML = `
-        <div style="color:#e11d48;">❌ 排盘失败：${escHtml(data.error || '未知错误')}</div>
-        <div style="margin-top:8px;color:#b45309;">💡 请检查出生信息是否正确，或回到 WorkBuddy 对话发送请求。</div>
-      `;
-    }
-  } catch(e) {
-    // API not available (e.g. on GitHub Pages) — fallback to clipboard
-    const prompt = `请帮我进行吠陀占星分析：\n问题：${question}\n出生信息：${profile.name||''}，${profile.birthDate} ${profile.birthTime}，${profile.birthPlace}`;
-    try {
-      await navigator.clipboard.writeText(prompt);
-      resultEl.innerHTML = `
-        <div style="font-weight:600;margin-bottom:8px;">📋 已复制到剪贴板</div>
-        <pre style="white-space:pre-wrap;font-size:12px;background:#fffbeb;padding:10px;border-radius:10px;">${escHtml(prompt)}</pre>
-        <div style="margin-top:8px;color:#b45309;">💡 请回到 <b>WorkBuddy</b> 对话，粘贴发送即可自动排盘分析。</div>
-      `;
-    } catch(_) {
-      resultEl.innerHTML = `
-        <div style="font-weight:600;margin-bottom:8px;">🔮 请复制以下内容发送给 WorkBuddy：</div>
-        <pre style="white-space:pre-wrap;font-size:12px;background:#fffbeb;padding:10px;border-radius:10px;">${escHtml(prompt)}</pre>
-      `;
-    }
-  }
-
-  document.getElementById('asQuestion').value = '';
-  renderAstrologyLogs();
-}
-
-function renderAstrologyLogs() {
-  const logs = appData.astrologyLogs || [];
-  const list = document.getElementById('astrologyLogs');
-  const empty = document.getElementById('astrologyEmpty');
-
-  if (logs.length === 0) {
-    list.innerHTML = '';
-    empty.style.display = 'block';
-  } else {
-    empty.style.display = 'none';
-    list.innerHTML = logs.map(l => `
-      <div class="done-item">
-        <div class="done-icon">🔮</div>
-        <div class="done-content">
-          <div class="done-text">${escHtml(l.question)}</div>
-          <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">${l.date}</div>
-          <button class="btn btn-danger btn-xs" onclick="deleteAstrologyLog('${l.id}')" style="margin-top:4px;">🗑️</button>
-        </div>
-      </div>
-    `).join('');
-  }
-}
-
-function deleteAstrologyLog(id) {
-  appData.astrologyLogs = (appData.astrologyLogs||[]).filter(l => l.id !== id);
-  persist();
-  renderAstrologyLogs();
-  showToast('已删除');
-}
-
 // ==================== INIT ====================
 function init() {
   checkDailyReset();
@@ -2987,16 +2786,6 @@ function init() {
   renderBallet();
   renderFitness();
   renderDoneItems();
-  renderAstrologyLogs();
-
-  // Load saved astrology profile
-  if (appData.astrologyProfile) {
-    const p = appData.astrologyProfile;
-    document.getElementById('asName').value = p.name || '';
-    document.getElementById('asBirthDate').value = p.birthDate || '';
-    document.getElementById('asBirthTime').value = p.birthTime || '';
-    document.getElementById('asBirthPlace').value = p.birthPlace || '';
-  }
 
   setInterval(updateClock, 1000);
 
