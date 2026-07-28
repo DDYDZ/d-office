@@ -1,0 +1,18 @@
+{
+  "name": "D事务所 · Personal Workspace",
+  "short_name": "D事务所",
+  "description": "AI驱动的个人工作台 — 工作管理、消费记录、阅读笔记、灵感收集、芭蕾健身打卡",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fff5f5",
+  "theme_color": "#f43f5e",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect rx='22' width='100' height='100' fill='%23f43f5e'/><text y='.72em' font-size='60' text-anchor='middle' x='50'>🏛️</text></svg>",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
