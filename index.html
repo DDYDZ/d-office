@@ -2649,14 +2649,15 @@ function saveFitness(id) {
 
   if (id) {
     const log = appData.fitnessLogs.find(l => l.id === id);
-    if (log) { log.project=project; log.hours=hours; log.note=note; log.encourage=encourage; log.date=dateVal; }
+    if (log) { log.project=project; log.hours=hours; log.note=note; log.encourage=encourage; log.date=dateVal; log.photo=fitnessPhotoData; }
   } else {
     appData.fitnessLogs.unshift({
       id: genId(), project, hours, note,
-      encourage, date: dateVal,
+      encourage, date: dateVal, photo: fitnessPhotoData,
       createdAt: new Date().toISOString()
     });
   }
+  fitnessPhotoData = null;
   persist();
   document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
   renderFitness();
@@ -2684,7 +2685,7 @@ function renderFitness() {
     empty.style.display = 'none';
     list.innerHTML = monthLogs.map(l => `
       <div class="expense-item">
-        <div class="expense-icon" style="background:#fef3c7">💪</div>
+        <div class="expense-icon" style="background:#fef3c7;overflow:hidden;">${l.photo ? `<img src="${l.photo}" style="width:100%;height:100%;object-fit:cover;">` : '💪'}</div>
         <div class="expense-info">
           <div class="expense-name">${l.project}</div>
           <div class="expense-cat">${l.date} · ${l.hours}h</div>
