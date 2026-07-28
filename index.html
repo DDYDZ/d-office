@@ -1683,10 +1683,14 @@ async function loadFromServer() {
     const resp = await fetch(SYNC_URL + '?t=' + Date.now());
     if (!resp.ok) return false;
     const serverData = await resp.json();
-    if (serverData && typeof serverData === 'object' && Object.keys(serverData).length > 0 && serverData.workTasks !== undefined) {
-      const localCount = (appData.workTasks||[]).length + (appData.expenses||[]).length + (appData.books||[]).length + (appData.doneItems||[]).length;
-      const serverCount = (serverData.workTasks||[]).length + (serverData.expenses||[]).length + (serverData.books||[]).length + (serverData.doneItems||[]).length;
-      if (serverCount > localCount) {
+    if (serverData && typeof serverData === 'object' && Object.keys(serverData).length > 1) {
+      // Count ALL data types
+      const countLocal = (d) => (Array.isArray(d) ? d.length : 0) + (typeof d === 'object' ? Object.keys(d||{}).length : 0);
+      let localCount = 0, serverCount = 0;
+      const keys = ['workTasks','expenses','books','inspirations','balletLogs','fitnessLogs','doneItems','englishWords','englishCheckins'];
+      keys.forEach(k => { localCount += countLocal(appData[k]); serverCount += countLocal(serverData[k]); });
+      // Load if server has more data OR local is completely empty
+      if (serverCount > localCount || localCount === 0) {
         appData = { ...getDefaultData(), ...serverData };
         saveData(appData);
         return true;
@@ -3175,7 +3179,8 @@ async function init() {
   // Try to load from cloud server first
   const reloaded = await loadFromServer();
   if (reloaded) {
-    // Re-render all if server had newer data
+    // Data was reloaded from cloud — show toast and re-render all
+    setTimeout(() => showToast('☁️ 数据已从云端同步'), 500);
   }
   updateClock();
   updateQuote();
