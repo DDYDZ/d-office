@@ -2760,9 +2760,10 @@ function checkMonthlyIncomeReset() {
 // --- 资产账户 CRUD ---
 function openAssetModal(asset) {
   const isEdit = !!asset;
-  document.getElementById('modalContainer').innerHTML = `
-    <div class="wealth-modal-overlay" onclick="this.remove()">
-      <div class="wealth-modal" onclick="event.stopPropagation()">
+  const modalId = 'wam-' + Date.now();
+  const html = `
+    <div class="wealth-modal-overlay" id="${modalId}-overlay">
+      <div class="wealth-modal" id="${modalId}-modal">
         <div class="wealth-modal-title">${isEdit ? '编辑' : '添加'}资产账户</div>
         <input class="wealth-input" id="wamName" placeholder="账户名称（如：工资卡、股票账户）" value="${isEdit ? escHtml(asset.name) : ''}">
         <select class="wealth-select" id="wamType">
@@ -2774,12 +2775,26 @@ function openAssetModal(asset) {
         </select>
         <input class="wealth-input" id="wamBalance" type="number" placeholder="当前余额 (¥)" step="0.01" value="${isEdit ? asset.balance : ''}">
         <div class="wealth-modal-actions">
-          <button class="wealth-btn" onclick="this.closest('.wealth-modal-overlay').remove()">取消</button>
-          ${isEdit ? '<button class="wealth-btn danger" onclick="deleteAsset(\''+asset.id+'\');this.closest(\'.wealth-modal-overlay\').remove()">删除</button>' : ''}
-          <button class="wealth-btn primary" onclick="saveAsset('${isEdit ? asset.id : ''}')">保存</button>
+          <button class="wealth-btn" id="${modalId}-cancel">取消</button>
+          ${isEdit ? '<button class="wealth-btn danger" id="'+modalId+'-delete">删除</button>' : ''}
+          <button class="wealth-btn primary" id="${modalId}-save">保存</button>
         </div>
       </div>
     </div>`;
+  document.getElementById('modalContainer').innerHTML = html;
+  // 手动绑定事件（iOS WKWebView 兼容）
+  document.getElementById(modalId + '-overlay').onclick = function() { this.remove(); };
+  document.getElementById(modalId + '-modal').onclick = function(e) { e.stopPropagation(); };
+  document.getElementById(modalId + '-cancel').onclick = function() {
+    document.getElementById(modalId + '-overlay').remove();
+  };
+  document.getElementById(modalId + '-save').onclick = function() { saveAsset(isEdit ? asset.id : ''); };
+  if (isEdit) {
+    document.getElementById(modalId + '-delete').onclick = function() {
+      deleteAsset(asset.id);
+      document.getElementById(modalId + '-overlay').remove();
+    };
+  }
 }
 function saveAsset(id) {
   try {
@@ -2813,9 +2828,10 @@ function deleteAsset(id) {
 // --- 负债 CRUD ---
 function openLiabilityModal(liability) {
   const isEdit = !!liability;
-  document.getElementById('modalContainer').innerHTML = `
-    <div class="wealth-modal-overlay" onclick="this.remove()">
-      <div class="wealth-modal" onclick="event.stopPropagation()">
+  const modalId = 'wlm-' + Date.now();
+  const html = `
+    <div class="wealth-modal-overlay" id="${modalId}-overlay">
+      <div class="wealth-modal" id="${modalId}-modal">
         <div class="wealth-modal-title">${isEdit ? '编辑' : '添加'}负债</div>
         <input class="wealth-input" id="wlmName" placeholder="负债名称（如：信用卡、房贷）" value="${isEdit ? escHtml(liability.name) : ''}">
         <select class="wealth-select" id="wlmType">
@@ -2827,12 +2843,26 @@ function openLiabilityModal(liability) {
         <input class="wealth-input" id="wlmBalance" type="number" placeholder="当前余额 (¥)" step="0.01" value="${isEdit ? liability.balance : ''}">
         <input class="wealth-input" id="wlmMonthly" type="number" placeholder="每月还款额 (¥)" step="0.01" value="${isEdit ? (liability.monthlyPayment||0) : ''}">
         <div class="wealth-modal-actions">
-          <button class="wealth-btn" onclick="this.closest('.wealth-modal-overlay').remove()">取消</button>
-          ${isEdit ? '<button class="wealth-btn danger" onclick="deleteLiability(\''+liability.id+'\');this.closest(\'.wealth-modal-overlay\').remove()">删除</button>' : ''}
-          <button class="wealth-btn primary" onclick="saveLiability('${isEdit ? liability.id : ''}')">保存</button>
+          <button class="wealth-btn" id="${modalId}-cancel">取消</button>
+          ${isEdit ? '<button class="wealth-btn danger" id="'+modalId+'-delete">删除</button>' : ''}
+          <button class="wealth-btn primary" id="${modalId}-save">保存</button>
         </div>
       </div>
     </div>`;
+  document.getElementById('modalContainer').innerHTML = html;
+  // 手动绑定事件（iOS WKWebView 兼容）
+  document.getElementById(modalId + '-overlay').onclick = function() { this.remove(); };
+  document.getElementById(modalId + '-modal').onclick = function(e) { e.stopPropagation(); };
+  document.getElementById(modalId + '-cancel').onclick = function() {
+    document.getElementById(modalId + '-overlay').remove();
+  };
+  document.getElementById(modalId + '-save').onclick = function() { saveLiability(isEdit ? liability.id : ''); };
+  if (isEdit) {
+    document.getElementById(modalId + '-delete').onclick = function() {
+      deleteLiability(liability.id);
+      document.getElementById(modalId + '-overlay').remove();
+    };
+  }
 }
 function saveLiability(id) {
   try {
@@ -2869,9 +2899,10 @@ function openWealthSettings() {
   const mi = appData.monthlyIncome || { salary: 0, bonus: 0, other: 0, month: '' };
   const wg = appData.wealthGoal || { target: 3000000, targetAge: 40, birthYear: 1995 };
   const budget = appData.monthlyBudget || 20000;
-  document.getElementById('modalContainer').innerHTML = `
-    <div class="wealth-modal-overlay" onclick="this.remove()">
-      <div class="wealth-modal" onclick="event.stopPropagation()">
+  const modalId = 'wsm-' + Date.now();
+  const html = `
+    <div class="wealth-modal-overlay" id="${modalId}-overlay">
+      <div class="wealth-modal" id="${modalId}-modal">
         <div class="wealth-modal-title">⚙️ 财富设置</div>
         <div style="font-size:12px;color:var(--wealth-gold);margin-bottom:8px;margin-top:12px;">📥 月度固定收入</div>
         <input class="wealth-input" id="wsmSalary" type="number" placeholder="月薪 (¥)" step="0.01" value="${mi.salary || ''}">
@@ -2884,11 +2915,18 @@ function openWealthSettings() {
         <div style="font-size:12px;color:var(--wealth-gold);margin-bottom:8px;margin-top:12px;">💳 月度预算</div>
         <input class="wealth-input" id="wsmBudget" type="number" placeholder="每月预算 (¥)" step="1" value="${budget}">
         <div class="wealth-modal-actions">
-          <button class="wealth-btn" onclick="this.closest('.wealth-modal-overlay').remove()">取消</button>
-          <button class="wealth-btn primary" onclick="saveWealthSettings()">保存设置</button>
+          <button class="wealth-btn" id="${modalId}-cancel">取消</button>
+          <button class="wealth-btn primary" id="${modalId}-save">保存设置</button>
         </div>
       </div>
     </div>`;
+  document.getElementById('modalContainer').innerHTML = html;
+  document.getElementById(modalId + '-overlay').onclick = function() { this.remove(); };
+  document.getElementById(modalId + '-modal').onclick = function(e) { e.stopPropagation(); };
+  document.getElementById(modalId + '-cancel').onclick = function() {
+    document.getElementById(modalId + '-overlay').remove();
+  };
+  document.getElementById(modalId + '-save').onclick = function() { saveWealthSettings(); };
 }
 function saveWealthSettings() {
   const salary = parseFloat(document.getElementById('wsmSalary').value) || 0;
