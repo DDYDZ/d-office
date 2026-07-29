@@ -46,6 +46,29 @@
   --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* ===== DD Wealth OS 深色科技风变量 ===== */
+:root {
+  --wealth-bg: #0a0e27;
+  --wealth-bg-card: #111636;
+  --wealth-bg-card-hover: #181d3a;
+  --wealth-gold: #d4a843;
+  --wealth-gold-light: #f0d078;
+  --wealth-gold-dim: #8b7332;
+  --wealth-blue: #4a9eff;
+  --wealth-blue-dim: #2a5a9e;
+  --wealth-cyan: #00d4aa;
+  --wealth-red: #ff4757;
+  --wealth-text: #e8e6f0;
+  --wealth-text-secondary: #8b8fa8;
+  --wealth-text-muted: #5a5d7a;
+  --wealth-border: #1e2248;
+  --wealth-border-light: #2a2f5a;
+  --wealth-radius: 16px;
+  --wealth-radius-sm: 10px;
+  --wealth-glow-gold: 0 0 20px rgba(212,168,67,0.15);
+  --wealth-glow-blue: 0 0 20px rgba(74,158,255,0.12);
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 /* iOS PWA touch fix — ensure all interactive elements are tappable in standalone mode */
@@ -1160,6 +1183,194 @@ select.input {
 @media (min-width: 769px) {
   .fab { display: none; }
 }
+
+/* ============================================= */
+/*  DD Wealth OS — 深色科技风财富面板            */
+/* ============================================= */
+
+/* Wealth 面板覆盖 */
+#panel-wealth {
+  background: var(--wealth-bg);
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 20px 16px 100px;
+  color: var(--wealth-text);
+}
+
+#panel-wealth .wealth-panel-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--wealth-gold);
+  margin-bottom: 4px;
+  letter-spacing: 1px;
+}
+
+#panel-wealth .wealth-panel-subtitle {
+  font-size: 12px;
+  color: var(--wealth-text-muted);
+  margin-bottom: 20px;
+  letter-spacing: 0.5px;
+}
+
+/* 通用卡片 */
+.wealth-card {
+  background: var(--wealth-bg-card);
+  border: 1px solid var(--wealth-border);
+  border-radius: var(--wealth-radius);
+  padding: 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--wealth-glow-gold);
+  position: relative;
+  overflow: hidden;
+}
+
+.wealth-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 20px; right: 20px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212,168,67,0.3), transparent);
+}
+
+.wealth-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.wealth-card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--wealth-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wealth-card-title .w-icon { font-size: 18px; }
+
+/* 1. 净资产仪表盘 */
+.networth-display { text-align: center; padding: 16px 0; }
+.networth-label { font-size: 12px; color: var(--wealth-text-muted); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 8px; }
+.networth-value { font-size: 48px; font-weight: 200; color: var(--wealth-gold-light); font-family: 'SF Mono','Menlo','Courier New',monospace; letter-spacing: -1px; line-height: 1.1; }
+.networth-change { font-size: 13px; margin-top: 6px; display: inline-flex; align-items: center; gap: 4px; padding: 4px 12px; border-radius: 20px; }
+.networth-change.up { color: var(--wealth-cyan); background: rgba(0,212,170,0.1); }
+.networth-change.down { color: var(--wealth-red); background: rgba(255,71,87,0.1); }
+
+.goal-progress-section { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--wealth-border); }
+.goal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.goal-header .goal-text { font-size: 13px; color: var(--wealth-text-secondary); }
+.goal-header .goal-pct { font-size: 20px; font-weight: 700; color: var(--wealth-gold); }
+.goal-bar { height: 8px; background: var(--wealth-border); border-radius: 4px; overflow: hidden; margin-bottom: 8px; }
+.goal-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--wealth-gold-dim), var(--wealth-gold), var(--wealth-gold-light)); transition: width 0.8s cubic-bezier(0.4,0,0.2,1); position: relative; }
+.goal-bar-fill::after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 4px; background: var(--wealth-gold-light); border-radius: 2px; box-shadow: 0 0 8px rgba(240,208,120,0.5); }
+.goal-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--wealth-text-muted); }
+
+/* 2. 资产概览 */
+.asset-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.asset-item { background: var(--wealth-bg); border: 1px solid var(--wealth-border); border-radius: var(--wealth-radius-sm); padding: 14px; text-align: center; }
+.asset-item .asset-type { font-size: 11px; color: var(--wealth-text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.asset-item .asset-amount { font-size: 20px; font-weight: 700; color: var(--wealth-text); font-family: 'SF Mono','Menlo',monospace; }
+.asset-item .asset-pct { font-size: 11px; color: var(--wealth-blue); margin-top: 4px; }
+
+/* 3. 负债概览 */
+.liability-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--wealth-border); }
+.liability-row:last-child { border-bottom: none; }
+.liability-name { font-size: 13px; color: var(--wealth-text-secondary); }
+.liability-amount { font-size: 15px; font-weight: 600; color: var(--wealth-red); font-family: 'SF Mono','Menlo',monospace; }
+.liability-ratio { margin-top: 12px; padding: 10px 14px; background: var(--wealth-bg); border-radius: var(--wealth-radius-sm); display: flex; justify-content: space-between; align-items: center; }
+.liability-ratio .ratio-label { font-size: 12px; color: var(--wealth-text-muted); }
+.liability-ratio .ratio-value { font-size: 16px; font-weight: 700; }
+.liability-ratio .ratio-value.safe { color: var(--wealth-cyan); }
+.liability-ratio .ratio-value.warn { color: var(--wealth-gold); }
+.liability-ratio .ratio-value.danger { color: var(--wealth-red); }
+
+/* 4. 月度现金流 */
+.cashflow-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+.cashflow-item { background: var(--wealth-bg); border: 1px solid var(--wealth-border); border-radius: var(--wealth-radius-sm); padding: 14px 10px; text-align: center; }
+.cashflow-item .cf-label { font-size: 10px; color: var(--wealth-text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.cashflow-item .cf-value { font-size: 20px; font-weight: 700; font-family: 'SF Mono','Menlo',monospace; }
+.cashflow-item .cf-value.income { color: var(--wealth-cyan); }
+.cashflow-item .cf-value.expense { color: var(--wealth-red); }
+.cashflow-item .cf-value.balance { color: var(--wealth-gold-light); }
+.budget-bar { height: 6px; background: var(--wealth-border); border-radius: 3px; overflow: hidden; margin-top: 10px; }
+.budget-bar-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
+.budget-bar-fill.safe { background: var(--wealth-cyan); }
+.budget-bar-fill.warn { background: var(--wealth-gold); }
+.budget-bar-fill.danger { background: var(--wealth-red); }
+.budget-meta { display: flex; justify-content: space-between; font-size: 11px; color: var(--wealth-text-muted); margin-top: 6px; }
+
+/* 5. 本月还能花 */
+.spending-advice { display: flex; align-items: center; gap: 16px; padding: 12px 0; }
+.advice-daily { text-align: center; flex: 1; }
+.advice-daily .daily-amount { font-size: 32px; font-weight: 200; color: var(--wealth-cyan); font-family: 'SF Mono','Menlo',monospace; }
+.advice-daily .daily-label { font-size: 11px; color: var(--wealth-text-muted); margin-top: 4px; }
+.advice-divider { width: 1px; height: 50px; background: var(--wealth-border); }
+.advice-stats { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+.advice-stat { display: flex; justify-content: space-between; font-size: 12px; }
+.advice-stat .stat-label { color: var(--wealth-text-muted); }
+.advice-stat .stat-value { color: var(--wealth-text); font-weight: 600; }
+
+/* 6. 财富评分 */
+.score-main { text-align: center; padding: 16px 0; }
+.score-grade { font-size: 72px; font-weight: 200; line-height: 1; font-family: 'SF Mono','Menlo',monospace; }
+.score-grade.grade-a { color: var(--wealth-cyan); }
+.score-grade.grade-b { color: var(--wealth-gold-light); }
+.score-grade.grade-c { color: var(--wealth-gold); }
+.score-grade.grade-d { color: var(--wealth-red); }
+.score-label { font-size: 14px; color: var(--wealth-text-secondary); margin-top: 6px; }
+.score-subs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--wealth-border); }
+.score-sub { text-align: center; padding: 8px; }
+.score-sub .sub-grade { font-size: 24px; font-weight: 700; font-family: 'SF Mono','Menlo',monospace; }
+.score-sub .sub-label { font-size: 10px; color: var(--wealth-text-muted); margin-top: 2px; }
+
+/* 7. 40岁目标追踪 */
+.goal-detail { padding: 8px 0; }
+.goal-detail-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--wealth-border); }
+.goal-detail-row:last-child { border-bottom: none; }
+.goal-detail-row .gd-label { font-size: 13px; color: var(--wealth-text-muted); }
+.goal-detail-row .gd-value { font-size: 14px; font-weight: 600; color: var(--wealth-text); font-family: 'SF Mono','Menlo',monospace; }
+.goal-detail-row .gd-value.highlight { color: var(--wealth-gold-light); }
+
+/* Wealth 按钮 */
+.wealth-btn { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--wealth-border-light); background: var(--wealth-bg); color: var(--wealth-text-secondary); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit; white-space: nowrap; }
+.wealth-btn:hover, .wealth-btn:active { background: var(--wealth-bg-card-hover); border-color: var(--wealth-gold-dim); color: var(--wealth-gold); }
+.wealth-btn.primary { background: linear-gradient(135deg, rgba(212,168,67,0.2), rgba(240,208,120,0.1)); border-color: var(--wealth-gold-dim); color: var(--wealth-gold-light); }
+.wealth-btn.danger { border-color: rgba(255,71,87,0.3); color: var(--wealth-red); }
+
+/* Wealth 弹窗 */
+.wealth-modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; animation: fadeIn 0.2s ease; }
+.wealth-modal { background: var(--wealth-bg-card); border: 1px solid var(--wealth-border-light); border-radius: var(--wealth-radius); padding: 24px; width: 100%; max-width: 400px; max-height: 85vh; overflow-y: auto; color: var(--wealth-text); box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+.wealth-modal-title { font-size: 18px; font-weight: 700; color: var(--wealth-gold); margin-bottom: 16px; }
+.wealth-input { width: 100%; padding: 12px 14px; border: 1px solid var(--wealth-border-light); border-radius: var(--wealth-radius-sm); font-size: 14px; font-family: inherit; color: var(--wealth-text); background: var(--wealth-bg); outline: none; transition: all 0.2s; margin-bottom: 10px; box-sizing:border-box; }
+.wealth-input:focus { border-color: var(--wealth-gold-dim); box-shadow: 0 0 0 3px rgba(212,168,67,0.1); }
+.wealth-input::placeholder { color: var(--wealth-text-muted); }
+.wealth-select { width: 100%; padding: 12px 14px; border: 1px solid var(--wealth-border-light); border-radius: var(--wealth-radius-sm); font-size: 14px; font-family: inherit; color: var(--wealth-text); background: var(--wealth-bg); outline: none; appearance: none; -webkit-appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%238b8fa8' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; margin-bottom: 10px; box-sizing:border-box; }
+.wealth-modal-actions { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
+
+/* 资产/负债行 */
+.wealth-item-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--wealth-bg); border-radius: var(--wealth-radius-sm); margin-bottom: 8px; border: 1px solid var(--wealth-border); }
+.wealth-item-info { flex: 1; min-width: 0; }
+.wealth-item-name { font-size: 14px; font-weight: 600; color: var(--wealth-text); }
+.wealth-item-sub { font-size: 11px; color: var(--wealth-text-muted); margin-top: 2px; }
+.wealth-item-amount { font-size: 16px; font-weight: 700; font-family: 'SF Mono','Menlo',monospace; margin-right: 10px; }
+.wealth-item-actions { display: flex; gap: 4px; }
+.wealth-item-actions button { width: 28px; height: 28px; border-radius: 50%; border: none; background: transparent; cursor: pointer; font-size: 13px; color: var(--wealth-text-muted); transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
+.wealth-item-actions button:hover { background: var(--wealth-bg-card-hover); color: var(--wealth-gold); }
+
+/* Wealth 响应式 */
+@media (max-width: 768px) {
+  #panel-wealth { padding: 16px 12px 120px; }
+  .networth-value { font-size: 38px; }
+  .asset-grid { grid-template-columns: repeat(2, 1fr); }
+  .cashflow-grid { grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .cashflow-item { padding: 10px 6px; }
+  .cashflow-item .cf-value { font-size: 17px; }
+  .score-grade { font-size: 56px; }
+}
 </style>
 </head>
 <body>
@@ -1188,6 +1399,11 @@ select.input {
     <button class="nav-item active" onclick="switchPanel('work', this)" data-panel="work" data-group="work">
       <span class="nav-icon">📋</span> 工作事项
       <span class="nav-badge" id="workBadge" style="display:none">0</span>
+    </button>
+
+    <!-- 财富总览 -->
+    <button class="nav-item" onclick="switchPanel('wealth', this)" data-panel="wealth" data-group="work">
+      <span class="nav-icon">📊</span> 财富总览
     </button>
 
     <!-- 生活区 -->
@@ -1362,6 +1578,186 @@ select.input {
           <div class="card-title"><span class="icon">📈</span> 消费分类占比</div>
         </div>
         <div id="catBreakdown"></div>
+      </div>
+    </section>
+
+    <!-- ===== DD WEALTH OS ===== -->
+    <section class="panel" id="panel-wealth">
+      <div class="wealth-panel-title">DD Wealth OS</div>
+      <div class="wealth-panel-subtitle">AI 个人 CFO · 净资产追踪 · 财富自由进度</div>
+
+      <!-- 1. 净资产仪表盘 -->
+      <div class="wealth-card" id="netWorthCard">
+        <div class="wealth-card-header">
+          <div class="wealth-card-title"><span class="w-icon">💎</span> 净资产</div>
+          <button class="wealth-btn" onclick="openWealthSettings()">⚙️ 设置</button>
+        </div>
+        <div class="networth-display">
+          <div class="networth-label">NET WORTH</div>
+          <div class="networth-value" id="netWorthValue">¥0</div>
+          <div class="networth-change" id="netWorthChange" style="display:none;"></div>
+        </div>
+        <div class="goal-progress-section">
+          <div class="goal-header">
+            <span class="goal-text">🎯 <span id="goalAgeText">40</span>岁目标 <span id="goalTargetText">300</span>万</span>
+            <span class="goal-pct" id="goalPct">0%</span>
+          </div>
+          <div class="goal-bar">
+            <div class="goal-bar-fill" id="goalBarFill" style="width:0%"></div>
+          </div>
+          <div class="goal-meta">
+            <span id="goalYearsLeft">距离目标还有 -- 年</span>
+            <span id="goalMonthlyNeed">月需储蓄 ¥--</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. 资产概览 -->
+      <div class="wealth-card" id="assetCard">
+        <div class="wealth-card-header">
+          <div class="wealth-card-title"><span class="w-icon">🏦</span> 资产概览</div>
+          <button class="wealth-btn primary" onclick="openAssetModal()">+ 添加资产</button>
+        </div>
+        <div class="asset-grid" id="assetSummary"></div>
+        <div id="assetList" style="margin-top:12px;"></div>
+        <div id="assetEmpty" style="text-align:center;padding:20px;color:var(--wealth-text-muted);font-size:13px;display:none;">
+          还没有资产账户，点击上方按钮添加
+        </div>
+      </div>
+
+      <!-- 3. 负债概览 -->
+      <div class="wealth-card" id="liabilityCard">
+        <div class="wealth-card-header">
+          <div class="wealth-card-title"><span class="w-icon">💳</span> 负债概览</div>
+          <button class="wealth-btn primary" onclick="openLiabilityModal()">+ 添加负债</button>
+        </div>
+        <div id="liabilityList"></div>
+        <div id="liabilityEmpty" style="text-align:center;padding:20px;color:var(--wealth-text-muted);font-size:13px;display:none;">
+          还没有负债记录
+        </div>
+        <div class="liability-ratio" id="liabilityRatio" style="display:none;">
+          <span class="ratio-label">资产负债率</span>
+          <span class="ratio-value" id="liabilityRatioValue">0%</span>
+        </div>
+      </div>
+
+      <!-- 4. 月度现金流 -->
+      <div class="wealth-card" id="cashflowCard">
+        <div class="wealth-card-header">
+          <div class="wealth-card-title"><span class="w-icon">📈</span> 月度现金流</div>
+        </div>
+        <div class="cashflow-grid">
+          <div class="cashflow-item">
+            <div class="cf-label">本月收入</div>
+            <div class="cf-value income" id="cfIncome">¥0</div>
+          </div>
+          <div class="cashflow-item">
+            <div class="cf-label">本月支出</div>
+            <div class="cf-value expense" id="cfExpense">¥0</div>
+          </div>
+          <div class="cashflow-item">
+            <div class="cf-label">本月结余</div>
+            <div class="cf-value balance" id="cfBalance">¥0</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--wealth-text-muted);margin-bottom:4px;">
+            <span>预算执行率</span><span id="budgetRate">0%</span>
+          </div>
+          <div class="budget-bar">
+            <div class="budget-bar-fill safe" id="budgetBarFill" style="width:0%"></div>
+          </div>
+          <div class="budget-meta">
+            <span>预算: ¥<span id="budgetAmount">20,000</span></span>
+            <span>已用: ¥<span id="budgetUsed">0</span></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. 本月还能花 -->
+      <div class="wealth-card" id="spendingCard">
+        <div class="wealth-card-header">
+          <div class="wealth-card-title"><span class="w-icon">💡</span> 本月还能花</div>
+        </div>
+        <div class="spending-advice">
+          <div class="advice-daily">
+            <div class="daily-amount" id="dailyBudget">¥0</div>
+            <div class="daily-label">建议每日消费</div>
+          </div>
+          <div class="advice-divider"></div>
+          <div class="advice-stats">
+            <div class="advice-stat">
+              <span class="stat-label">预算剩余</span>
+              <span class="stat-value" id="budgetRemaining">¥0</span>
+            </div>
+            <div class="advice-stat">
+              <span class="stat-label">距离月底</span>
+              <span class="stat-value" id="daysRemaining">0 天</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 6. 财富评分 -->
+      <div class="wealth-card" id="scoreCard">
+        <div class="wealth-card-header">
+          <div class="wealth-card-title"><span class="w-icon">🏅</span> 财富评分</div>
+        </div>
+        <div class="score-main">
+          <div class="score-grade" id="wealthGrade">--</div>
+          <div class="score-label" id="wealthGradeLabel">综合评分</div>
+        </div>
+        <div class="score-subs">
+          <div class="score-sub">
+            <div class="sub-grade" id="subCashflow" style="color:var(--wealth-text-muted);">--</div>
+            <div class="sub-label">现金流</div>
+          </div>
+          <div class="score-sub">
+            <div class="sub-grade" id="subSpending" style="color:var(--wealth-text-muted);">--</div>
+            <div class="sub-label">消费控制</div>
+          </div>
+          <div class="score-sub">
+            <div class="sub-grade" id="subRisk" style="color:var(--wealth-text-muted);">--</div>
+            <div class="sub-label">投资风险</div>
+          </div>
+          <div class="score-sub">
+            <div class="sub-grade" id="subSaving" style="color:var(--wealth-text-muted);">--</div>
+            <div class="sub-label">储蓄率</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7. 40岁目标追踪 -->
+      <div class="wealth-card" id="goalDetailCard">
+        <div class="wealth-card-header">
+          <div class="wealth-card-title"><span class="w-icon">🎯</span> 财富自由进度</div>
+        </div>
+        <div class="goal-detail">
+          <div class="goal-detail-row">
+            <span class="gd-label">目标金额</span>
+            <span class="gd-value highlight" id="gdTarget">¥3,000,000</span>
+          </div>
+          <div class="goal-detail-row">
+            <span class="gd-label">当前净资产</span>
+            <span class="gd-value" id="gdCurrent">¥0</span>
+          </div>
+          <div class="goal-detail-row">
+            <span class="gd-label">完成进度</span>
+            <span class="gd-value highlight" id="gdProgress">0%</span>
+          </div>
+          <div class="goal-detail-row">
+            <span class="gd-label">预计达成</span>
+            <span class="gd-value" id="gdETA">--</span>
+          </div>
+          <div class="goal-detail-row">
+            <span class="gd-label">本月需储蓄</span>
+            <span class="gd-value highlight" id="gdMonthlyNeed">¥--</span>
+          </div>
+          <div class="goal-detail-row">
+            <span class="gd-label">当前年龄</span>
+            <span class="gd-value" id="gdCurrentAge">--</span>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -1584,8 +1980,8 @@ select.input {
   <button class="bottom-nav-item active" onclick="switchPanelMobile('work', this)">
     <span class="bnav-icon">💼</span> 工作
   </button>
-  <button class="bottom-nav-item" onclick="switchPanelMobile('expense', this)">
-    <span class="bnav-icon">🏠</span> 生活
+  <button class="bottom-nav-item" onclick="switchPanelMobile('wealth', this)">
+    <span class="bnav-icon">📊</span> 财富
   </button>
   <button class="bottom-nav-item" onclick="switchPanelMobile('inspo', this)">
     <span class="bnav-icon">💡</span> 灵感
@@ -1634,7 +2030,23 @@ function getDefaultData() {
     englishRepeatCount: {},
     englishWords: [],
     checkins: {},
-    lastResetDate: new Date().toDateString()
+    lastResetDate: new Date().toDateString(),
+    // ===== DD Wealth OS 新增字段 =====
+    assetAccounts: [],        // 资产账户列表 [{ id, name, type, balance, lastUpdated }]
+    liabilities: [],          // 负债列表 [{ id, name, type, balance, monthlyPayment, lastUpdated }]
+    monthlyIncome: {          // 月度固定收入
+      salary: 0,
+      bonus: 0,
+      other: 0,
+      month: ''               // YYYY-MM 格式，用于判断是否跨月
+    },
+    wealthGoal: {             // 财富目标
+      target: 3000000,        // 目标金额（默认300万）
+      targetAge: 40,          // 目标年龄
+      birthYear: 1995         // 出生年份
+    },
+    monthlyBudget: 20000,     // 每月预算
+    assetSnapshots: []        // 资产快照历史 [{ date: 'YYYY-MM-DD', netWorth: 数字 }]
   };
 }
 
@@ -1690,7 +2102,8 @@ async function loadFromServer() {
       // Count ALL data types
       const countLocal = (d) => (Array.isArray(d) ? d.length : 0) + (typeof d === 'object' ? Object.keys(d||{}).length : 0);
       let localCount = 0, serverCount = 0;
-      const keys = ['workTasks','expenses','books','inspirations','balletLogs','fitnessLogs','doneItems','englishWords','englishCheckins'];
+      const keys = ['workTasks','expenses','books','inspirations','balletLogs','fitnessLogs','doneItems','englishWords','englishCheckins',
+        'assetAccounts','liabilities','monthlyIncome','wealthGoal','monthlyBudget','assetSnapshots'];
       keys.forEach(k => { localCount += countLocal(appData[k]); serverCount += countLocal(serverData[k]); });
       // Load if server has more data OR local is completely empty
       if (serverCount > localCount || localCount === 0) {
@@ -1909,7 +2322,7 @@ function switchPanel(panelName, el) {
 
   // Update bottom nav
   document.querySelectorAll('.bottom-nav-item').forEach(b => b.classList.remove('active'));
-  const mobileMap = { work: 0, expense: 1, books: 1, inspo: 1, english: 1, ballet: 3, fitness: 3, plans: 4 };
+  const mobileMap = { work: 0, wealth: 1, expense: 1, books: 1, inspo: 2, english: 2, ballet: 3, fitness: 3, plans: 4 };
   const bottomItems = document.querySelectorAll('.bottom-nav-item');
   const idx = mobileMap[panelName];
   if (idx !== undefined && bottomItems[idx]) bottomItems[idx].classList.add('active');
@@ -1942,6 +2355,7 @@ function refreshCurrentPanel(panelName) {
     case 'english': renderEnglish(); break;
     case 'ballet': renderBallet(); break;
     case 'fitness': renderFitness(); break;
+    case 'wealth': renderWealth(); break;
     case 'plans': renderDoneItems(); break;
   }
 }
@@ -1969,6 +2383,7 @@ function quickAdd() {
   else if (id === 'panel-inspo') openInspoModal();
   else if (id === 'panel-ballet') openBalletModal();
   else if (id === 'panel-fitness') openFitnessModal();
+  else if (id === 'panel-wealth') openAssetModal();
   else if (id === 'panel-plans') openDoneModal();
 }
 
@@ -2304,6 +2719,360 @@ function parseVoiceExpense(text) {
     document.getElementById('expNote').value = text;
     showToast('已记录语音内容，请手动填写金额');
   }
+}
+
+// ==================== DD WEALTH OS ====================
+
+// --- 工具函数 ---
+function getDaysInMonth() {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+}
+function getDaysRemainingInMonth() {
+  const now = new Date();
+  return getDaysInMonth() - now.getDate();
+}
+function getCurrentAge() {
+  const birthYear = appData.wealthGoal?.birthYear || 1995;
+  return new Date().getFullYear() - birthYear;
+}
+function getYearsToTarget() {
+  const targetAge = appData.wealthGoal?.targetAge || 40;
+  return Math.max(0, targetAge - getCurrentAge());
+}
+function formatCurrency(n) {
+  n = Number(n) || 0;
+  if (Math.abs(n) >= 10000) return '¥' + (n / 10000).toFixed(2) + '万';
+  return '¥' + Number(n).toLocaleString('zh-CN', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+}
+
+// --- 月度固定收入检查 ---
+function checkMonthlyIncomeReset() {
+  const currentMonth = getMonthKey();
+  const mi = appData.monthlyIncome;
+  if (!mi || mi.month !== currentMonth) {
+    if (!mi) appData.monthlyIncome = { salary: 0, bonus: 0, other: 0, month: currentMonth };
+    else appData.monthlyIncome.month = currentMonth;
+    persist();
+  }
+}
+
+// --- 资产账户 CRUD ---
+function openAssetModal(asset) {
+  const isEdit = !!asset;
+  document.getElementById('modalContainer').innerHTML = `
+    <div class="wealth-modal-overlay" onclick="this.remove()">
+      <div class="wealth-modal" onclick="event.stopPropagation()">
+        <div class="wealth-modal-title">${isEdit ? '编辑' : '添加'}资产账户</div>
+        <input class="wealth-input" id="wamName" placeholder="账户名称（如：工资卡、股票账户）" value="${isEdit ? escHtml(asset.name) : ''}">
+        <select class="wealth-select" id="wamType">
+          <option value="cash" ${isEdit && asset.type==='cash' ? 'selected' : ''}>💵 现金/存款</option>
+          <option value="stock" ${isEdit && asset.type==='stock' ? 'selected' : ''}>📈 股票</option>
+          <option value="fund" ${isEdit && asset.type==='fund' ? 'selected' : ''}>🏠 公积金</option>
+          <option value="insurance" ${isEdit && asset.type==='insurance' ? 'selected' : ''}>🛡️ 保险</option>
+          <option value="other" ${isEdit && asset.type==='other' ? 'selected' : ''}>📦 其他</option>
+        </select>
+        <input class="wealth-input" id="wamBalance" type="number" placeholder="当前余额 (¥)" step="0.01" value="${isEdit ? asset.balance : ''}">
+        <div class="wealth-modal-actions">
+          <button class="wealth-btn" onclick="this.closest('.wealth-modal-overlay').remove()">取消</button>
+          ${isEdit ? '<button class="wealth-btn danger" onclick="deleteAsset(\''+asset.id+'\');this.closest(\'.wealth-modal-overlay\').remove()">删除</button>' : ''}
+          <button class="wealth-btn primary" onclick="saveAsset('${isEdit ? asset.id : ''}')">保存</button>
+        </div>
+      </div>
+    </div>`;
+}
+function saveAsset(id) {
+  const name = document.getElementById('wamName').value.trim();
+  const type = document.getElementById('wamType').value;
+  const balance = parseFloat(document.getElementById('wamBalance').value);
+  if (!name) { showToast('请输入账户名称'); return; }
+  if (isNaN(balance) || balance < 0) { showToast('请输入有效的余额'); return; }
+  if (id) {
+    const asset = appData.assetAccounts.find(a => a.id === id);
+    if (asset) { asset.name = name; asset.type = type; asset.balance = balance; asset.lastUpdated = new Date().toISOString(); }
+  } else {
+    appData.assetAccounts.push({ id: genId(), name, type, balance, lastUpdated: new Date().toISOString() });
+  }
+  persist();
+  document.querySelectorAll('.wealth-modal-overlay').forEach(m => m.remove());
+  renderWealth();
+  showToast('资产已保存 ✅');
+}
+function deleteAsset(id) {
+  appData.assetAccounts = appData.assetAccounts.filter(a => a.id !== id);
+  persist();
+  renderWealth();
+  showToast('资产已删除');
+}
+
+// --- 负债 CRUD ---
+function openLiabilityModal(liability) {
+  const isEdit = !!liability;
+  document.getElementById('modalContainer').innerHTML = `
+    <div class="wealth-modal-overlay" onclick="this.remove()">
+      <div class="wealth-modal" onclick="event.stopPropagation()">
+        <div class="wealth-modal-title">${isEdit ? '编辑' : '添加'}负债</div>
+        <input class="wealth-input" id="wlmName" placeholder="负债名称（如：信用卡、房贷）" value="${isEdit ? escHtml(liability.name) : ''}">
+        <select class="wealth-select" id="wlmType">
+          <option value="credit" ${isEdit && liability.type==='credit' ? 'selected' : ''}>💳 信用卡</option>
+          <option value="mortgage" ${isEdit && liability.type==='mortgage' ? 'selected' : ''}>🏠 房贷</option>
+          <option value="loan" ${isEdit && liability.type==='loan' ? 'selected' : ''}>💰 消费贷</option>
+          <option value="other" ${isEdit && liability.type==='other' ? 'selected' : ''}>📌 其他</option>
+        </select>
+        <input class="wealth-input" id="wlmBalance" type="number" placeholder="当前余额 (¥)" step="0.01" value="${isEdit ? liability.balance : ''}">
+        <input class="wealth-input" id="wlmMonthly" type="number" placeholder="每月还款额 (¥)" step="0.01" value="${isEdit ? (liability.monthlyPayment||0) : ''}">
+        <div class="wealth-modal-actions">
+          <button class="wealth-btn" onclick="this.closest('.wealth-modal-overlay').remove()">取消</button>
+          ${isEdit ? '<button class="wealth-btn danger" onclick="deleteLiability(\''+liability.id+'\');this.closest(\'.wealth-modal-overlay\').remove()">删除</button>' : ''}
+          <button class="wealth-btn primary" onclick="saveLiability('${isEdit ? liability.id : ''}')">保存</button>
+        </div>
+      </div>
+    </div>`;
+}
+function saveLiability(id) {
+  const name = document.getElementById('wlmName').value.trim();
+  const type = document.getElementById('wlmType').value;
+  const balance = parseFloat(document.getElementById('wlmBalance').value);
+  const monthlyPayment = parseFloat(document.getElementById('wlmMonthly').value) || 0;
+  if (!name) { showToast('请输入负债名称'); return; }
+  if (isNaN(balance) || balance < 0) { showToast('请输入有效的余额'); return; }
+  if (id) {
+    const liab = appData.liabilities.find(l => l.id === id);
+    if (liab) { liab.name = name; liab.type = type; liab.balance = balance; liab.monthlyPayment = monthlyPayment; liab.lastUpdated = new Date().toISOString(); }
+  } else {
+    appData.liabilities.push({ id: genId(), name, type, balance, monthlyPayment, lastUpdated: new Date().toISOString() });
+  }
+  persist();
+  document.querySelectorAll('.wealth-modal-overlay').forEach(m => m.remove());
+  renderWealth();
+  showToast('负债已保存 ✅');
+}
+function deleteLiability(id) {
+  appData.liabilities = appData.liabilities.filter(l => l.id !== id);
+  persist();
+  renderWealth();
+  showToast('负债已删除');
+}
+
+// --- 财富设置弹窗 ---
+function openWealthSettings() {
+  const mi = appData.monthlyIncome || { salary: 0, bonus: 0, other: 0, month: '' };
+  const wg = appData.wealthGoal || { target: 3000000, targetAge: 40, birthYear: 1995 };
+  const budget = appData.monthlyBudget || 20000;
+  document.getElementById('modalContainer').innerHTML = `
+    <div class="wealth-modal-overlay" onclick="this.remove()">
+      <div class="wealth-modal" onclick="event.stopPropagation()">
+        <div class="wealth-modal-title">⚙️ 财富设置</div>
+        <div style="font-size:12px;color:var(--wealth-gold);margin-bottom:8px;margin-top:12px;">📥 月度固定收入</div>
+        <input class="wealth-input" id="wsmSalary" type="number" placeholder="月薪 (¥)" step="0.01" value="${mi.salary || ''}">
+        <input class="wealth-input" id="wsmBonus" type="number" placeholder="奖金 (¥)" step="0.01" value="${mi.bonus || ''}">
+        <input class="wealth-input" id="wsmOther" type="number" placeholder="其他收入 (¥)" step="0.01" value="${mi.other || ''}">
+        <div style="font-size:12px;color:var(--wealth-gold);margin-bottom:8px;margin-top:12px;">🎯 财富目标</div>
+        <input class="wealth-input" id="wsmTarget" type="number" placeholder="目标金额（万元）" step="1" value="${(wg.target/10000).toFixed(0)}">
+        <input class="wealth-input" id="wsmTargetAge" type="number" placeholder="目标年龄" value="${wg.targetAge}">
+        <input class="wealth-input" id="wsmBirthYear" type="number" placeholder="出生年份" value="${wg.birthYear}">
+        <div style="font-size:12px;color:var(--wealth-gold);margin-bottom:8px;margin-top:12px;">💳 月度预算</div>
+        <input class="wealth-input" id="wsmBudget" type="number" placeholder="每月预算 (¥)" step="1" value="${budget}">
+        <div class="wealth-modal-actions">
+          <button class="wealth-btn" onclick="this.closest('.wealth-modal-overlay').remove()">取消</button>
+          <button class="wealth-btn primary" onclick="saveWealthSettings()">保存设置</button>
+        </div>
+      </div>
+    </div>`;
+}
+function saveWealthSettings() {
+  const salary = parseFloat(document.getElementById('wsmSalary').value) || 0;
+  const bonus = parseFloat(document.getElementById('wsmBonus').value) || 0;
+  const other = parseFloat(document.getElementById('wsmOther').value) || 0;
+  const targetWan = parseFloat(document.getElementById('wsmTarget').value) || 300;
+  const targetAge = parseInt(document.getElementById('wsmTargetAge').value) || 40;
+  const birthYear = parseInt(document.getElementById('wsmBirthYear').value) || 1995;
+  const budget = parseFloat(document.getElementById('wsmBudget').value) || 20000;
+  appData.monthlyIncome = { salary, bonus, other, month: getMonthKey() };
+  appData.wealthGoal = { target: targetWan * 10000, targetAge, birthYear };
+  appData.monthlyBudget = budget;
+  persist();
+  document.querySelectorAll('.wealth-modal-overlay').forEach(m => m.remove());
+  renderWealth();
+  showToast('财富设置已更新 ✅');
+}
+
+// --- 净资产快照 ---
+function saveNetWorthSnapshot(netWorth) {
+  if (!appData.assetSnapshots) appData.assetSnapshots = [];
+  const today = getToday();
+  const existing = appData.assetSnapshots.find(s => s.date === today);
+  if (existing) existing.netWorth = netWorth;
+  else appData.assetSnapshots.push({ date: today, netWorth });
+  if (appData.assetSnapshots.length > 90) appData.assetSnapshots = appData.assetSnapshots.slice(-90);
+}
+function getNetWorthChange(currentNetWorth) {
+  if (!appData.assetSnapshots || appData.assetSnapshots.length < 2) return null;
+  const sorted = [...appData.assetSnapshots].sort((a, b) => a.date.localeCompare(b.date));
+  const prev = sorted[sorted.length - 2];
+  if (!prev || prev.netWorth === currentNetWorth) return null;
+  return { change: currentNetWorth - prev.netWorth, prevDate: prev.date };
+}
+function estimateMonthlySavingSpeed(currentNetWorth) {
+  if (!appData.assetSnapshots || appData.assetSnapshots.length < 2) return 0;
+  const sorted = [...appData.assetSnapshots].sort((a, b) => a.date.localeCompare(b.date));
+  const recent = sorted.filter(s => {
+    const d = new Date(s.date);
+    const now = new Date();
+    return (now - d) / (1000 * 60 * 60 * 24) <= 30;
+  });
+  if (recent.length < 2) return 0;
+  const first = recent[0], last = recent[recent.length - 1];
+  const daysDiff = Math.max(1, (new Date(last.date) - new Date(first.date)) / (1000 * 60 * 60 * 24));
+  return (last.netWorth - first.netWorth) / daysDiff * 30;
+}
+
+// --- 主渲染函数 ---
+function renderWealth() {
+  checkMonthlyIncomeReset();
+
+  // 核心计算
+  const totalAssets = (appData.assetAccounts || []).reduce((s, a) => s + (a.balance || 0), 0);
+  const totalLiabilities = (appData.liabilities || []).reduce((s, l) => s + (l.balance || 0), 0);
+  const netWorth = totalAssets - totalLiabilities;
+
+  saveNetWorthSnapshot(netWorth);
+  const changeInfo = getNetWorthChange(netWorth);
+
+  const wg = appData.wealthGoal || { target: 3000000, targetAge: 40, birthYear: 1995 };
+  const currentAge = getCurrentAge();
+  const yearsToTarget = getYearsToTarget();
+  const goalPct = wg.target > 0 ? Math.min(100, Math.round(netWorth / wg.target * 100)) : 0;
+
+  // 月度现金流
+  const monthKey = getMonthKey();
+  const monthExpenses = (appData.expenses || []).filter(e => e.date && e.date.startsWith(monthKey));
+  const monthlyExpense = monthExpenses.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
+  const monthlyExpenseIncome = monthExpenses.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
+  const mi = appData.monthlyIncome || { salary: 0, bonus: 0, other: 0 };
+  const fixedIncome = (mi.salary || 0) + (mi.bonus || 0) + (mi.other || 0);
+  const totalIncome = fixedIncome + monthlyExpenseIncome;
+  const monthlyBalance = totalIncome - monthlyExpense;
+
+  // 预算
+  const budget = appData.monthlyBudget || 20000;
+  const budgetRate = budget > 0 ? Math.round(monthlyExpense / budget * 100) : 0;
+  const budgetRemaining = budget - monthlyExpense;
+  const daysRemaining = getDaysRemainingInMonth();
+  const dailyBudget = daysRemaining > 0 ? Math.round(budgetRemaining / daysRemaining) : budgetRemaining;
+
+  // 储蓄率
+  const savingRate = totalIncome > 0 ? Math.round((totalIncome - monthlyExpense) / totalIncome * 100) : 0;
+  // 资产负债率
+  const liabilityRatio = totalAssets > 0 ? Math.round(totalLiabilities / totalAssets * 100) : 0;
+
+  // 储蓄速度估算
+  const monthlySavingSpeed = estimateMonthlySavingSpeed(netWorth);
+  const etaMonths = monthlySavingSpeed > 0 ? Math.ceil((wg.target - netWorth) / monthlySavingSpeed) : 999;
+  const etaText = etaMonths < 999 ? Math.floor(etaMonths/12)+'年'+etaMonths%12+'个月' : '--';
+  const monthlyNeed = yearsToTarget > 0 && yearsToTarget < 999 ? Math.round((wg.target - netWorth) / (yearsToTarget * 12)) : 0;
+
+  // 1. 净资产仪表盘
+  document.getElementById('netWorthValue').textContent = formatCurrency(netWorth);
+  const changeEl = document.getElementById('netWorthChange');
+  if (changeInfo) {
+    changeEl.style.display = 'inline-flex';
+    changeEl.className = 'networth-change ' + (changeInfo.change >= 0 ? 'up' : 'down');
+    changeEl.innerHTML = (changeInfo.change >= 0 ? '▲' : '▼') + ' ' + formatCurrency(Math.abs(changeInfo.change)) + ' <span style="font-size:11px;opacity:0.7;">较上次</span>';
+  } else { changeEl.style.display = 'none'; }
+
+  document.getElementById('goalAgeText').textContent = wg.targetAge;
+  document.getElementById('goalTargetText').textContent = Math.round(wg.target / 10000);
+  document.getElementById('goalPct').textContent = goalPct + '%';
+  document.getElementById('goalBarFill').style.width = goalPct + '%';
+  document.getElementById('goalYearsLeft').textContent = yearsToTarget > 0 ? '距离'+wg.targetAge+'岁还有 '+yearsToTarget+' 年' : '已到达目标年龄';
+  document.getElementById('goalMonthlyNeed').textContent = monthlyNeed > 0 ? '月需储蓄 '+formatCurrency(monthlyNeed) : '目标已达成';
+
+  // 2. 资产概览
+  const typeMap = { cash: { label:'现金/存款',icon:'💵' }, stock: { label:'股票',icon:'📈' }, fund: { label:'公积金',icon:'🏠' }, insurance: { label:'保险',icon:'🛡️' }, other: { label:'其他',icon:'📦' } };
+  const typeAgg = {};
+  (appData.assetAccounts || []).forEach(a => { if (!typeAgg[a.type]) typeAgg[a.type] = 0; typeAgg[a.type] += a.balance || 0; });
+  document.getElementById('assetSummary').innerHTML = Object.entries(typeAgg).map(([type, amt]) => {
+    const pct = totalAssets > 0 ? Math.round(amt / totalAssets * 100) : 0;
+    const t = typeMap[type];
+    return '<div class="asset-item"><div class="asset-type">'+(t?t.icon:'📦')+' '+(t?t.label:type)+'</div><div class="asset-amount">'+formatCurrency(amt)+'</div><div class="asset-pct">'+pct+'%</div></div>';
+  }).join('');
+
+  const assetListEl = document.getElementById('assetList');
+  const assetEmptyEl = document.getElementById('assetEmpty');
+  if ((appData.assetAccounts || []).length === 0) { assetListEl.innerHTML = ''; assetEmptyEl.style.display = 'block'; }
+  else {
+    assetEmptyEl.style.display = 'none';
+    assetListEl.innerHTML = (appData.assetAccounts || []).map(a => {
+      const t = typeMap[a.type];
+      return '<div class="wealth-item-row"><div class="wealth-item-info"><div class="wealth-item-name">'+(t?t.icon:'📦')+' '+escHtml(a.name)+'</div><div class="wealth-item-sub">'+(t?t.label:a.type)+'</div></div><div class="wealth-item-amount" style="color:var(--wealth-cyan);">'+formatCurrency(a.balance)+'</div><div class="wealth-item-actions"><button onclick="openAssetModal(appData.assetAccounts.find(x=>x.id===\''+a.id+'\'))" title="编辑">✏️</button><button onclick="deleteAsset(\''+a.id+'\')" title="删除">🗑️</button></div></div>';
+    }).join('');
+  }
+
+  // 3. 负债概览
+  const liabilityListEl = document.getElementById('liabilityList');
+  const liabilityEmptyEl = document.getElementById('liabilityEmpty');
+  const liabilityRatioEl = document.getElementById('liabilityRatio');
+  if ((appData.liabilities || []).length === 0) { liabilityListEl.innerHTML = ''; liabilityEmptyEl.style.display = 'block'; liabilityRatioEl.style.display = 'none'; }
+  else {
+    liabilityEmptyEl.style.display = 'none'; liabilityRatioEl.style.display = 'flex';
+    liabilityListEl.innerHTML = (appData.liabilities || []).map(l => {
+      return '<div class="wealth-item-row"><div class="wealth-item-info"><div class="wealth-item-name">'+escHtml(l.name)+'</div><div class="wealth-item-sub">'+(l.monthlyPayment?'月供: '+formatCurrency(l.monthlyPayment):'')+'</div></div><div class="wealth-item-amount" style="color:var(--wealth-red);">'+formatCurrency(l.balance)+'</div><div class="wealth-item-actions"><button onclick="openLiabilityModal(appData.liabilities.find(x=>x.id===\''+l.id+'\'))" title="编辑">✏️</button><button onclick="deleteLiability(\''+l.id+'\')" title="删除">🗑️</button></div></div>';
+    }).join('');
+  }
+  const ratioVal = document.getElementById('liabilityRatioValue');
+  ratioVal.textContent = liabilityRatio + '%';
+  ratioVal.className = 'ratio-value ' + (liabilityRatio < 30 ? 'safe' : liabilityRatio < 50 ? 'warn' : 'danger');
+
+  // 4. 月度现金流
+  document.getElementById('cfIncome').textContent = formatCurrency(totalIncome);
+  document.getElementById('cfExpense').textContent = formatCurrency(monthlyExpense);
+  const cfBalance = document.getElementById('cfBalance');
+  cfBalance.textContent = formatCurrency(monthlyBalance);
+  cfBalance.className = 'cf-value ' + (monthlyBalance >= 0 ? 'income' : 'expense');
+  document.getElementById('budgetRate').textContent = budgetRate + '%';
+  const budgetFill = document.getElementById('budgetBarFill');
+  budgetFill.style.width = Math.min(100, budgetRate) + '%';
+  budgetFill.className = 'budget-bar-fill ' + (budgetRate < 80 ? 'safe' : budgetRate < 100 ? 'warn' : 'danger');
+  document.getElementById('budgetAmount').textContent = Number(budget).toLocaleString();
+  document.getElementById('budgetUsed').textContent = Number(monthlyExpense).toLocaleString();
+
+  // 5. 本月还能花
+  document.getElementById('dailyBudget').textContent = formatCurrency(Math.max(0, dailyBudget));
+  document.getElementById('budgetRemaining').textContent = formatCurrency(Math.max(0, budgetRemaining));
+  document.getElementById('daysRemaining').textContent = daysRemaining + ' 天';
+
+  // 6. 财富评分
+  function r2g(rate, th) { return rate <= th[0] ? 'A' : rate <= th[1] ? 'B' : rate <= th[2] ? 'C' : 'D'; }
+  function r2gH(rate, th) { return rate >= th[0] ? 'A' : rate >= th[1] ? 'B' : rate >= th[2] ? 'C' : 'D'; }
+  const gradeLiability = r2g(liabilityRatio, [20, 40, 60]);
+  const gradeSaving = r2gH(savingRate, [50, 30, 10]);
+  const gradeBudget = r2g(budgetRate, [80, 100, 120]);
+  const stockAmount = (appData.assetAccounts || []).filter(a => a.type === 'stock').reduce((s,a) => s + (a.balance||0), 0);
+  const stockRatio = totalAssets > 0 ? Math.round(stockAmount / totalAssets * 100) : 0;
+  const gradeRisk = r2g(stockRatio, [30, 50, 70]);
+  const gs = { A:4, B:3, C:2, D:1 };
+  const avg = [gradeLiability, gradeSaving, gradeBudget, gradeRisk].reduce((s,g) => s + (gs[g]||0), 0) / 4;
+  const overallGrade = avg >= 3.5 ? 'A' : avg >= 2.5 ? 'B' : avg >= 1.5 ? 'C' : 'D';
+
+  const gradeEl = document.getElementById('wealthGrade');
+  gradeEl.textContent = overallGrade;
+  gradeEl.className = 'score-grade grade-' + overallGrade.toLowerCase();
+  document.getElementById('wealthGradeLabel').textContent = overallGrade === 'A' ? '优秀 · 财务健康' : overallGrade === 'B' ? '良好 · 稳健可控' : overallGrade === 'C' ? '一般 · 需要关注' : '较差 · 亟需改善';
+  const subs = { subCashflow: gradeBudget, subSpending: gradeSaving, subRisk: gradeRisk, subSaving: gradeSaving };
+  Object.entries(subs).forEach(([id, g]) => {
+    const el = document.getElementById(id);
+    el.textContent = g;
+    el.style.color = g === 'A' ? 'var(--wealth-cyan)' : g === 'B' ? 'var(--wealth-gold-light)' : g === 'C' ? 'var(--wealth-gold)' : 'var(--wealth-red)';
+  });
+
+  // 7. 40岁目标追踪
+  document.getElementById('gdTarget').textContent = formatCurrency(wg.target);
+  document.getElementById('gdCurrent').textContent = formatCurrency(netWorth);
+  document.getElementById('gdProgress').textContent = goalPct + '%';
+  document.getElementById('gdETA').textContent = etaText;
+  document.getElementById('gdMonthlyNeed').textContent = monthlyNeed > 0 ? formatCurrency(monthlyNeed) : '--';
+  document.getElementById('gdCurrentAge').textContent = currentAge + ' 岁';
 }
 
 // ==================== BOOKS ====================
@@ -3194,6 +3963,7 @@ async function init() {
   renderFitness();
   renderDoneItems();
   renderEnglish();
+  renderWealth();
   
   // Then try to sync from cloud in background (won't block rendering)
   loadFromServer().then(reloaded => {
@@ -3210,6 +3980,7 @@ async function init() {
       renderFitness();
       renderDoneItems();
       renderEnglish();
+      renderWealth();
       showToast('☁️ 数据已从云端同步');
     }
   }).catch(() => {});
