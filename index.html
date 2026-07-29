@@ -1680,7 +1680,10 @@ async function syncToServer() {
 
 async function loadFromServer() {
   try {
-    const resp = await fetch(SYNC_URL + '?t=' + Date.now());
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const resp = await fetch(SYNC_URL + '?t=' + Date.now(), { signal: controller.signal });
+    clearTimeout(timeoutId);
     if (!resp.ok) return false;
     const serverData = await resp.json();
     if (serverData && typeof serverData === 'object' && Object.keys(serverData).length > 1) {
@@ -1696,7 +1699,9 @@ async function loadFromServer() {
         return true;
       }
     }
-  } catch(e) {}
+  } catch(e) {
+    console.log('Cloud sync skipped:', e.message || 'network error');
+  }
   return false;
 }
 
@@ -3176,12 +3181,8 @@ function renderEngCalendar() {
 // ==================== INIT ====================
 async function init() {
   checkDailyReset();
-  // Try to load from cloud server first
-  const reloaded = await loadFromServer();
-  if (reloaded) {
-    // Data was reloaded from cloud — show toast and re-render all
-    setTimeout(() => showToast('☁️ 数据已从云端同步'), 500);
-  }
+  
+  // Render immediately first (fast path)
   updateClock();
   updateQuote();
   updateCheckinUI();
@@ -3193,6 +3194,25 @@ async function init() {
   renderFitness();
   renderDoneItems();
   renderEnglish();
+  
+  // Then try to sync from cloud in background (won't block rendering)
+  loadFromServer().then(reloaded => {
+    if (reloaded) {
+      // Re-render all after cloud data loaded
+      updateClock();
+      updateQuote();
+      updateCheckinUI();
+      renderWorkTasks();
+      renderExpenses();
+      renderBooks();
+      renderInspirations();
+      renderBallet();
+      renderFitness();
+      renderDoneItems();
+      renderEnglish();
+      showToast('☁️ 数据已从云端同步');
+    }
+  }).catch(() => {});
 
   setInterval(updateClock, 1000);
 
@@ -3340,10 +3360,25 @@ function clearAllData() {
 // ==================== PWA — Service Worker ====================
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then(() => {
-      console.log('📦 D事务所 SW registered — offline ready');
-    }).catch(() => {
-      console.log('SW registration skipped');
+    navigator.serviceWorker.register('/sw.js?v=3').then((reg) => {
+      console.log('📦 D事务所 SW v3 registered — offline ready');
+      // Force update check
+      reg.update();
+      // When a new SW is waiting, notify user and apply immediately
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              console.log('📦 New SW installed, reloading...');
+              // New content available — reload page to activate
+              window.location.reload();
+            }
+          });
+        }
+      });
+    }).catch((e) => {
+      console.log('SW registration skipped:', e.message);
     });
   });
 }

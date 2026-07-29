@@ -1,5 +1,6 @@
 // D事务所 Service Worker — Offline PWA Support
-const CACHE_NAME = 'd-office-v2';
+// Version: v3 (force refresh to fix stale cache issues)
+const CACHE_NAME = 'd-office-v3';
 const ASSETS = [
   '/',
   '/index.html',
@@ -8,21 +9,33 @@ const ASSETS = [
 
 // Install — cache all assets
 self.addEventListener('install', (event) => {
+  console.log('📦 D事务所 SW v3 — installing...');
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS);
-    }).then(() => self.skipWaiting())
+    }).then(() => {
+      console.log('📦 D事务所 SW v3 — installed, skipping waiting');
+      return self.skipWaiting();
+    })
   );
 });
 
-// Activate — clean old caches
+// Activate — clean ALL old caches aggressively
 self.addEventListener('activate', (event) => {
+  console.log('📦 D事务所 SW v3 — activating...');
   event.waitUntil(
     caches.keys().then((keys) => {
+      console.log('📦 Found caches:', keys);
       return Promise.all(
-        keys.filter(key => key !== CACHE_NAME).map(key => caches.delete(key))
+        keys.map(key => {
+          console.log('📦 Deleting old cache:', key);
+          return caches.delete(key);
+        })
       );
-    }).then(() => self.clients.claim())
+    }).then(() => {
+      console.log('📦 D事务所 SW v3 — activated, claiming clients');
+      return self.clients.claim();
+    })
   );
 });
 
