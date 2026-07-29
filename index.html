@@ -3996,13 +3996,81 @@ function updateEngTask() {
 }
 
 function addEngWord() {
-  const word = prompt('输入生词：');
-  if (!word || !word.trim()) return;
-  const meaning = prompt('输入释义：');
-  if (!appData.englishWords) appData.englishWords = [];
-  appData.englishWords.unshift({ word: word.trim(), meaning: (meaning||'').trim(), date: getToday(), id: genId() });
-  persist();
-  renderEngWords();
+  const modalId = 'ew-' + Date.now();
+  const html = `
+    <div class="modal-overlay" id="${modalId}-overlay">
+      <div class="modal" id="${modalId}-modal" style="max-width:380px;">
+        <div class="modal-title">📝 添加生词</div>
+        <input class="input" id="${modalId}-word" placeholder="输入英文单词" style="margin-bottom:10px;font-size:16px;" autocomplete="off">
+        <div id="${modalId}-status" style="font-size:12px;color:var(--text-muted);margin-bottom:8px;">输入单词后自动查询释义</div>
+        <input class="input" id="${modalId}-meaning" placeholder="中文释义（自动查询）" style="margin-bottom:10px;">
+        <div class="modal-actions">
+          <button class="btn btn-secondary" id="${modalId}-cancel">取消</button>
+          <button class="btn btn-primary" id="${modalId}-save">保存</button>
+        </div>
+      </div>
+    </div>`;
+  document.getElementById('modalContainer').innerHTML = html;
+
+  const overlay = document.getElementById(modalId + '-overlay');
+  const modal = document.getElementById(modalId + '-modal');
+  const wordInput = document.getElementById(modalId + '-word');
+  const meaningInput = document.getElementById(modalId + '-meaning');
+  const statusEl = document.getElementById(modalId + '-status');
+
+  overlay.onclick = function() { this.remove(); };
+  modal.onclick = function(e) { e.stopPropagation(); };
+  document.getElementById(modalId + '-cancel').onclick = function() { overlay.remove(); };
+  document.getElementById(modalId + '-save').onclick = function() {
+    const word = wordInput.value.trim();
+    const meaning = meaningInput.value.trim();
+    if (!word) { showToast('请输入单词'); return; }
+    if (!appData.englishWords) appData.englishWords = [];
+    appData.englishWords.unshift({ word, meaning, date: getToday(), id: genId() });
+    persist();
+    overlay.remove();
+    renderEngWords();
+    showToast('已添加 ✅');
+  };
+
+  // Auto-lookup: on input change (debounced 500ms)
+  let lookupTimer = null;
+  wordInput.oninput = function() {
+    const w = this.value.trim();
+    if (!w) { meaningInput.value = ''; statusEl.textContent = '输入单词后自动查询释义'; statusEl.style.color = 'var(--text-muted)'; return; }
+    statusEl.textContent = '🔍 查询中...';
+    statusEl.style.color = 'var(--text-muted)';
+    clearTimeout(lookupTimer);
+    lookupTimer = setTimeout(function() { lookupWordMeaning(w, meaningInput, statusEl); }, 500);
+  };
+  wordInput.focus();
+}
+
+async function lookupWordMeaning(word, meaningInput, statusEl) {
+  try {
+    const resp = await fetch('https://dict.youdao.com/suggest?num=3&ver=3.0&doctype=json&cache=false&q=' + encodeURIComponent(word) + '&le=en');
+    if (!resp.ok) throw new Error('API error');
+    const data = await resp.json();
+    if (data && data.data && data.data.entries && data.data.entries.length > 0) {
+      const entry = data.data.entries[0];
+      if (entry.entry.toLowerCase() === word.toLowerCase()) {
+        meaningInput.value = entry.explain || '';
+        statusEl.innerHTML = '✅ 已查到释义，可编辑修改';
+        statusEl.style.color = '#059669';
+      } else {
+        meaningInput.value = entry.explain || '';
+        statusEl.innerHTML = '⚡ 显示近似词释义，可编辑修改';
+        statusEl.style.color = '#92400e';
+      }
+    } else {
+      statusEl.innerHTML = '⚠️ 未查到释义，请手动输入';
+      statusEl.style.color = '#dc2626';
+    }
+  } catch(e) {
+    console.log('Word lookup error:', e.message);
+    statusEl.innerHTML = '⚠️ 查询失败，请手动输入释义';
+    statusEl.style.color = '#dc2626';
+  }
 }
 
 function deleteEngWord(id) {
