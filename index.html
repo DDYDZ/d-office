@@ -2454,10 +2454,16 @@ function saveWork(id) {
   document.querySelectorAll('.modal-overlay').forEach(m => m.remove());
   renderWorkTasks();
   showToast(id ? '已更新 ✅' : '已添加 ✅');
+  // Schedule notification for reminder
+  if (reminder) {
+    requestNotifPermission();
+    scheduleReminders();
+  }
 }
 
 function deleteWork(id) {
   appData.workTasks = appData.workTasks.filter(t => t.id !== id);
+  if (reminderTimeouts[id]) { clearTimeout(reminderTimeouts[id]); delete reminderTimeouts[id]; }
   persist();
   renderWorkTasks();
   showToast('已删除');
@@ -2470,6 +2476,7 @@ function toggleWorkComplete(id) {
     task.category = task.completed ? 'done' : 'regular';
     persist();
     renderWorkTasks();
+    scheduleReminders(); // reschedule notifications
   }
 }
 
@@ -2526,6 +2533,53 @@ function renderWorkTasks() {
   } else {
     badge.style.display = 'none';
   }
+}
+
+// ==================== REMINDER NOTIFICATIONS ====================
+const reminderTimeouts = {};
+
+function requestNotifPermission() {
+  if (!('Notification' in window)) return false;
+  if (Notification.permission === 'granted') return true;
+  if (Notification.permission === 'denied') return false;
+  Notification.requestPermission();
+  return false;
+}
+
+function sendReminderNotif(task) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  try {
+    const notif = new Notification('⏰ D事务所 · 待沟通提醒', {
+      body: task.title + (task.desc ? '\n' + task.desc : ''),
+      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect rx="22" width="100" height="100" fill="%23f43f5e"/><text y=".72em" font-size="60" text-anchor="middle" x="50">🏛️</text></svg>',
+      tag: 'd-office-reminder-' + task.id,
+      requireInteraction: true
+    });
+    notif.onclick = function() {
+      window.focus();
+      this.close();
+    };
+    setTimeout(() => notif.close(), 30000); // auto-close after 30s
+  } catch(e) {
+    console.log('Notification error:', e.message);
+  }
+}
+
+function scheduleReminders() {
+  // Clear all existing scheduled reminders
+  Object.values(reminderTimeouts).forEach(id => clearTimeout(id));
+  const now = Date.now();
+  const pending = appData.workTasks.filter(t => !t.completed && t.reminder);
+  pending.forEach(task => {
+    const reminderTime = new Date(task.reminder).getTime();
+    const delay = reminderTime - now;
+    if (delay > -60000 && delay < 30 * 24 * 60 * 60 * 1000) { // within 30 days (60s grace for same-minute)
+      reminderTimeouts[task.id] = setTimeout(() => {
+        sendReminderNotif(task);
+        delete reminderTimeouts[task.id];
+      }, delay);
+    }
+  });
 }
 
 // ==================== EXPENSES ====================
@@ -4012,6 +4066,8 @@ async function init() {
   renderDoneItems();
   renderEnglish();
   renderWealth();
+  // Schedule reminder notifications
+  scheduleReminders();
   
   // Then try to sync from cloud in background (won't block rendering)
   loadFromServer().then(reloaded => {
@@ -4029,6 +4085,7 @@ async function init() {
       renderDoneItems();
       renderEnglish();
       renderWealth();
+      scheduleReminders();
       showToast('☁️ 数据已从云端同步');
     }
   }).catch(() => {});
