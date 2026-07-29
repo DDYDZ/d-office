@@ -2782,21 +2782,26 @@ function openAssetModal(asset) {
     </div>`;
 }
 function saveAsset(id) {
-  const name = document.getElementById('wamName').value.trim();
-  const type = document.getElementById('wamType').value;
-  const balance = parseFloat(document.getElementById('wamBalance').value);
-  if (!name) { showToast('请输入账户名称'); return; }
-  if (isNaN(balance) || balance < 0) { showToast('请输入有效的余额'); return; }
-  if (id) {
-    const asset = appData.assetAccounts.find(a => a.id === id);
-    if (asset) { asset.name = name; asset.type = type; asset.balance = balance; asset.lastUpdated = new Date().toISOString(); }
-  } else {
-    appData.assetAccounts.push({ id: genId(), name, type, balance, lastUpdated: new Date().toISOString() });
+  try {
+    const name = document.getElementById('wamName').value.trim();
+    const type = document.getElementById('wamType').value;
+    const balance = parseFloat(document.getElementById('wamBalance').value);
+    if (!name) { showToast('请输入账户名称'); return; }
+    if (isNaN(balance) || balance < 0) { showToast('请输入有效的余额'); return; }
+    if (id) {
+      const asset = appData.assetAccounts.find(a => a.id === id);
+      if (asset) { asset.name = name; asset.type = type; asset.balance = balance; asset.lastUpdated = new Date().toISOString(); }
+    } else {
+      appData.assetAccounts.push({ id: genId(), name, type, balance, lastUpdated: new Date().toISOString() });
+    }
+    persist();
+    document.querySelectorAll('.wealth-modal-overlay').forEach(m => m.remove());
+    renderWealth();
+    showToast('资产已保存 ✅');
+  } catch(e) {
+    console.error('saveAsset error:', e);
+    showToast('保存失败: ' + e.message + ' ❌');
   }
-  persist();
-  document.querySelectorAll('.wealth-modal-overlay').forEach(m => m.remove());
-  renderWealth();
-  showToast('资产已保存 ✅');
 }
 function deleteAsset(id) {
   appData.assetAccounts = appData.assetAccounts.filter(a => a.id !== id);
@@ -2830,22 +2835,27 @@ function openLiabilityModal(liability) {
     </div>`;
 }
 function saveLiability(id) {
-  const name = document.getElementById('wlmName').value.trim();
-  const type = document.getElementById('wlmType').value;
-  const balance = parseFloat(document.getElementById('wlmBalance').value);
-  const monthlyPayment = parseFloat(document.getElementById('wlmMonthly').value) || 0;
-  if (!name) { showToast('请输入负债名称'); return; }
-  if (isNaN(balance) || balance < 0) { showToast('请输入有效的余额'); return; }
-  if (id) {
-    const liab = appData.liabilities.find(l => l.id === id);
-    if (liab) { liab.name = name; liab.type = type; liab.balance = balance; liab.monthlyPayment = monthlyPayment; liab.lastUpdated = new Date().toISOString(); }
-  } else {
-    appData.liabilities.push({ id: genId(), name, type, balance, monthlyPayment, lastUpdated: new Date().toISOString() });
+  try {
+    const name = document.getElementById('wlmName').value.trim();
+    const type = document.getElementById('wlmType').value;
+    const balance = parseFloat(document.getElementById('wlmBalance').value);
+    const monthlyPayment = parseFloat(document.getElementById('wlmMonthly').value) || 0;
+    if (!name) { showToast('请输入负债名称'); return; }
+    if (isNaN(balance) || balance < 0) { showToast('请输入有效的余额'); return; }
+    if (id) {
+      const liab = appData.liabilities.find(l => l.id === id);
+      if (liab) { liab.name = name; liab.type = type; liab.balance = balance; liab.monthlyPayment = monthlyPayment; liab.lastUpdated = new Date().toISOString(); }
+    } else {
+      appData.liabilities.push({ id: genId(), name, type, balance, monthlyPayment, lastUpdated: new Date().toISOString() });
+    }
+    persist();
+    document.querySelectorAll('.wealth-modal-overlay').forEach(m => m.remove());
+    renderWealth();
+    showToast('负债已保存 ✅');
+  } catch(e) {
+    console.error('saveLiability error:', e);
+    showToast('保存失败: ' + e.message + ' ❌');
   }
-  persist();
-  document.querySelectorAll('.wealth-modal-overlay').forEach(m => m.remove());
-  renderWealth();
-  showToast('负债已保存 ✅');
 }
 function deleteLiability(id) {
   appData.liabilities = appData.liabilities.filter(l => l.id !== id);
