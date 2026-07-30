@@ -2584,7 +2584,7 @@ function scheduleReminders() {
 
 // ==================== EXPENSES ====================
 function addExpense() {
-  const amount = parseFloat(document.getElementById('expAmount').value);
+  const amount = parseFloat(document.getElementById('expAmount').value.replace(/[^\d.\-]/g, ''));
   const type = document.getElementById('expType').value;
   const category = document.getElementById('expCategory').value;
   const note = document.getElementById('expNote').value.trim();
@@ -2854,7 +2854,8 @@ function saveAsset(id) {
   try {
     const name = document.getElementById('wamName').value.trim();
     const type = document.getElementById('wamType').value;
-    const balance = parseFloat(document.getElementById('wamBalance').value);
+    const raw = document.getElementById('wamBalance').value.replace(/[^\d.\-]/g, '');
+    const balance = parseFloat(raw);
     if (!name) { showToast('请输入账户名称'); return; }
     if (isNaN(balance) || balance < 0) { showToast('请输入有效的余额'); return; }
     if (id) {
@@ -2922,8 +2923,8 @@ function saveLiability(id) {
   try {
     const name = document.getElementById('wlmName').value.trim();
     const type = document.getElementById('wlmType').value;
-    const balance = parseFloat(document.getElementById('wlmBalance').value);
-    const monthlyPayment = parseFloat(document.getElementById('wlmMonthly').value) || 0;
+    const balance = parseFloat(document.getElementById('wlmBalance').value.replace(/[^\d.\-]/g, ''));
+    const monthlyPayment = parseFloat(document.getElementById('wlmMonthly').value.replace(/[^\d.\-]/g, '')) || 0;
     if (!name) { showToast('请输入负债名称'); return; }
     if (isNaN(balance) || balance < 0) { showToast('请输入有效的余额'); return; }
     if (id) {
@@ -2983,13 +2984,14 @@ function openWealthSettings() {
   document.getElementById(modalId + '-save').onclick = function() { saveWealthSettings(); };
 }
 function saveWealthSettings() {
-  const salary = parseFloat(document.getElementById('wsmSalary').value) || 0;
-  const bonus = parseFloat(document.getElementById('wsmBonus').value) || 0;
-  const other = parseFloat(document.getElementById('wsmOther').value) || 0;
-  const targetWan = parseFloat(document.getElementById('wsmTarget').value) || 300;
+  const clean = v => parseFloat(v.replace(/[^\d.\-]/g, ''));
+  const salary = clean(document.getElementById('wsmSalary').value) || 0;
+  const bonus = clean(document.getElementById('wsmBonus').value) || 0;
+  const other = clean(document.getElementById('wsmOther').value) || 0;
+  const targetWan = clean(document.getElementById('wsmTarget').value) || 300;
   const targetAge = parseInt(document.getElementById('wsmTargetAge').value) || 40;
   const birthYear = parseInt(document.getElementById('wsmBirthYear').value) || 1995;
-  const budget = parseFloat(document.getElementById('wsmBudget').value) || 20000;
+  const budget = clean(document.getElementById('wsmBudget').value) || 20000;
   appData.monthlyIncome = { salary, bonus, other, month: getMonthKey() };
   appData.wealthGoal = { target: targetWan * 10000, targetAge, birthYear };
   appData.monthlyBudget = budget;
