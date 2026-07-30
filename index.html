@@ -2819,7 +2819,7 @@ function openAssetModal(asset) {
     <div class="wealth-modal-overlay" id="${modalId}-overlay">
       <div class="wealth-modal" id="${modalId}-modal">
         <div class="wealth-modal-title">${isEdit ? '编辑' : '添加'}资产账户</div>
-        <input class="wealth-input" id="wamName" placeholder="账户名称（如：工资卡、股票账户）" value="${isEdit ? escHtml(asset.name) : ''}">
+        <input class="wealth-input" id="wamName" placeholder="账户名称 *必填（如：工资卡、股票账户）" value="${isEdit ? escHtml(asset.name) : ''}">
         <select class="wealth-select" id="wamType">
           <option value="cash" ${isEdit && asset.type==='cash' ? 'selected' : ''}>💵 现金/存款</option>
           <option value="stock" ${isEdit && asset.type==='stock' ? 'selected' : ''}>📈 股票</option>
@@ -2827,7 +2827,7 @@ function openAssetModal(asset) {
           <option value="insurance" ${isEdit && asset.type==='insurance' ? 'selected' : ''}>🛡️ 保险</option>
           <option value="other" ${isEdit && asset.type==='other' ? 'selected' : ''}>📦 其他</option>
         </select>
-        <input class="wealth-input" id="wamBalance" type="number" placeholder="当前余额 (¥)" step="0.01" value="${isEdit ? asset.balance : ''}">
+        <input class="wealth-input" id="wamBalance" type="number" placeholder="当前余额 (¥) *必填" step="0.01" value="${isEdit ? asset.balance : ''}" style="font-weight:600;font-size:16px;">
         <div class="wealth-modal-actions">
           <button class="wealth-btn" id="${modalId}-cancel">取消</button>
           ${isEdit ? '<button class="wealth-btn danger" id="'+modalId+'-delete">删除</button>' : ''}
@@ -2887,15 +2887,15 @@ function openLiabilityModal(liability) {
     <div class="wealth-modal-overlay" id="${modalId}-overlay">
       <div class="wealth-modal" id="${modalId}-modal">
         <div class="wealth-modal-title">${isEdit ? '编辑' : '添加'}负债</div>
-        <input class="wealth-input" id="wlmName" placeholder="负债名称（如：信用卡、房贷）" value="${isEdit ? escHtml(liability.name) : ''}">
+        <input class="wealth-input" id="wlmName" placeholder="负债名称 *必填（如：招行信用卡、房贷）" value="${isEdit ? escHtml(liability.name) : ''}">
+        <input class="wealth-input" id="wlmBalance" type="number" placeholder="当前余额 (¥) *必填" step="0.01" value="${isEdit ? liability.balance : ''}" style="font-weight:600;font-size:16px;">
         <select class="wealth-select" id="wlmType">
           <option value="credit" ${isEdit && liability.type==='credit' ? 'selected' : ''}>💳 信用卡</option>
           <option value="mortgage" ${isEdit && liability.type==='mortgage' ? 'selected' : ''}>🏠 房贷</option>
           <option value="loan" ${isEdit && liability.type==='loan' ? 'selected' : ''}>💰 消费贷</option>
           <option value="other" ${isEdit && liability.type==='other' ? 'selected' : ''}>📌 其他</option>
         </select>
-        <input class="wealth-input" id="wlmBalance" type="number" placeholder="当前余额 (¥)" step="0.01" value="${isEdit ? liability.balance : ''}">
-        <input class="wealth-input" id="wlmMonthly" type="number" placeholder="每月还款额 (¥)" step="0.01" value="${isEdit ? (liability.monthlyPayment||0) : ''}">
+        <input class="wealth-input" id="wlmMonthly" type="number" placeholder="每月还款额（可选）" step="0.01" value="${isEdit ? (liability.monthlyPayment||0) : ''}">
         <div class="wealth-modal-actions">
           <button class="wealth-btn" id="${modalId}-cancel">取消</button>
           ${isEdit ? '<button class="wealth-btn danger" id="'+modalId+'-delete">删除</button>' : ''}
